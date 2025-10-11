@@ -116,14 +116,14 @@ export default function ProductsGrid({ title = "Featured Products", showFilters 
   }, [autoScroll]);
 
   return (
-    <section className="py-16 px-4" style={{backgroundColor: 'var(--bg-primary)'}}>
+    <section className="py-16 px-4 bg-gray-50">
       <div className="container mx-auto">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-thin mb-4" style={{color: 'var(--text-primary)', fontFamily: 'var(--font-secondary)'}}>
+          <h2 className="text-4xl md:text-5xl font-thin mb-4 text-gray-900" style={{fontFamily: 'var(--font-secondary)'}}>
             {title}
           </h2>
-          <p className="text-lg max-w-2xl mx-auto" style={{color: 'var(--text-secondary)', fontFamily: 'var(--font-primary)'}}>
+          <p className="text-lg max-w-2xl mx-auto text-gray-600" style={{fontFamily: 'var(--font-primary)'}}>
             Discover our exquisite collection of handcrafted jewelry, featuring the finest diamonds, precious gemstones, and precious metals.
           </p>
         </div>
@@ -137,8 +137,8 @@ export default function ProductsGrid({ title = "Featured Products", showFilters 
                 className="px-6 py-3 rounded-full font-medium transition-all duration-300 hover:scale-105"
                 style={{
                   backgroundColor: category === 'All' ? 'var(--color-primary)' : 'transparent',
-                  color: category === 'All' ? 'var(--color-black)' : 'var(--text-secondary)',
-                  border: `2px solid ${category === 'All' ? 'var(--color-primary)' : 'var(--border-primary)'}`,
+                  color: category === 'All' ? 'var(--color-black)' : '#6b7280',
+                  border: `2px solid ${category === 'All' ? 'var(--color-primary)' : '#e5e7eb'}`,
                   fontFamily: 'var(--font-primary)'
                 }}
               >
@@ -152,10 +152,10 @@ export default function ProductsGrid({ title = "Featured Products", showFilters 
         <div className="relative">
           {/* Gradient Overlays for smooth edges */}
           <div className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{
-            background: 'linear-gradient(to right, var(--bg-primary), transparent)'
+            background: 'linear-gradient(to right, #f9fafb, transparent)'
           }}></div>
           <div className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none" style={{
-            background: 'linear-gradient(to left, var(--bg-primary), transparent)'
+            background: 'linear-gradient(to left, #f9fafb, transparent)'
           }}></div>
 
           {/* Scrollable Products Container */}
@@ -190,7 +190,7 @@ export default function ProductsGrid({ title = "Featured Products", showFilters 
               key={dot}
               className="w-3 h-3 rounded-full transition-all duration-300"
               style={{
-                backgroundColor: dot === 1 ? 'var(--color-primary)' : 'var(--color-gray-400)'
+                backgroundColor: dot === 1 ? 'var(--color-primary)' : '#d1d5db'
               }}
             ></button>
           ))}
