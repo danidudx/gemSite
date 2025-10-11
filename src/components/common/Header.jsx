@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import {
   Search,
   ShoppingCart,
@@ -7,10 +7,13 @@ import {
   Menu,
   X,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
+import { AuthContext } from "../../contexts/AuthContext";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
 
   return (
     <header className="border-b">
@@ -51,7 +54,18 @@ export default function Header() {
           <div className="flex items-center gap-4">
             <Search size={20} className="cursor-pointer hover:text-blue-600" />
             <Heart size={20} className="cursor-pointer hover:text-blue-600" />
-            <User size={20} className="cursor-pointer hover:text-blue-600" />
+            {user ? (
+              <button
+                onClick={logout}
+                className="flex items-center gap-1 text-sm hover:text-blue-600 transition-colors"
+                title="Logout"
+              >
+                <LogOut size={20} />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            ) : (
+              <User size={20} className="cursor-pointer hover:text-blue-600" />
+            )}
             <div className="relative">
               <ShoppingCart
                 size={20}
