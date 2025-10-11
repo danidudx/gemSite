@@ -2,12 +2,14 @@ import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../config/firebase";
 import { Link, useNavigate } from "react-router-dom";
+import { syncUserToBackend } from "../services/authService";
 
 export default function Register() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -15,9 +17,23 @@ export default function Register() {
     e.preventDefault();
     setError("");
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      
+      const idToken = await user.getIdToken();
+      
+      const userData = {
+        uid: user.uid,
+        email: user.email,
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone
+      };
+      
+      await syncUserToBackend(userData, idToken);
       navigate("/");
-    } catch {
+    } catch (error) {
+      console.error("Registration error:", error);
       setError("Failed to create account. Try again.");
     }
   };
@@ -67,6 +83,19 @@ export default function Register() {
               className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          {/* Phone */}
+          <div className="mb-4">
+            <label className="block text-sm mb-1">Phone Number</label>
+            <input
+              type="tel"
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1234567890"
               required
             />
           </div>

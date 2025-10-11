@@ -16,6 +16,9 @@ export function AuthProvider({ children }) {
       if (currentUser) {
         const token = await currentUser.getIdToken();
         console.log("Firebase ID Token:", token);
+        console.log("Firebase UID:", currentUser.uid);
+        console.log("User Email:", currentUser.email);
+        console.log("User Display Name:", currentUser.displayName);
       }
       setLoading(false);
     });
