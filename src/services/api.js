@@ -115,13 +115,32 @@ class ApiService {
     });
   }
 
+  // Homepage Management
+  async getHomepage() {
+    return this.request("/homepage");
+  }
+
+  async updateHomepage(homepageData) {
+    return this.request("/homepage", {
+      method: "PUT",
+      body: JSON.stringify(homepageData),
+    });
+  }
+
   // Dashboard Statistics
   async getDashboardStats() {
     try {
-      const [productsResponse, blogsResponse] = await Promise.all([
-        this.getProducts({ limit: 1000 }), // Get all products for count
-        this.getBlogs({ limit: 1000 }), // Get all blogs for count
-      ]);
+      const [productsResponse, blogsResponse, homepageResponse] =
+        await Promise.all([
+          this.getProducts({ limit: 1000 }), // Get all products for count
+          this.getBlogs({ limit: 1000 }), // Get all blogs for count
+          this.getHomepage().catch(() => ({
+            featuredGems: [],
+            featuredJewelry: [],
+            collections: [],
+            promotions: [],
+          })), // Get homepage data
+        ]);
 
       return {
         totalProducts:
@@ -135,9 +154,22 @@ class ApiService {
           (blogsResponse.blogs ? blogsResponse.blogs.length : 0) ||
           (Array.isArray(blogsResponse) ? blogsResponse.length : 0),
         totalInquiries: 0, // Mock data for now
+        totalFeaturedGems: homepageResponse.featuredGems
+          ? homepageResponse.featuredGems.length
+          : 0,
+        totalFeaturedJewelry: homepageResponse.featuredJewelry
+          ? homepageResponse.featuredJewelry.length
+          : 0,
+        totalCollections: homepageResponse.collections
+          ? homepageResponse.collections.length
+          : 0,
+        totalPromotions: homepageResponse.promotions
+          ? homepageResponse.promotions.length
+          : 0,
         recentProducts: productsResponse.products || productsResponse || [],
         recentBlogs: blogsResponse.blogs || blogsResponse || [],
         recentInquiries: [],
+        homepageData: homepageResponse,
       };
     } catch (error) {
       console.error("Failed to fetch dashboard stats:", error);

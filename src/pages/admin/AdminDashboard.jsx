@@ -9,9 +9,14 @@ const AdminDashboard = () => {
     totalProducts: 0,
     totalBlogs: 0,
     totalInquiries: 0,
+    totalFeaturedGems: 0,
+    totalFeaturedJewelry: 0,
+    totalCollections: 0,
+    totalPromotions: 0,
     recentProducts: [],
     recentBlogs: [],
     recentInquiries: [],
+    homepageData: {},
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,9 +44,14 @@ const AdminDashboard = () => {
         totalProducts: 0,
         totalBlogs: 0,
         totalInquiries: 0,
+        totalFeaturedGems: 0,
+        totalFeaturedJewelry: 0,
+        totalCollections: 0,
+        totalPromotions: 0,
         recentProducts: [],
         recentBlogs: [],
         recentInquiries: [],
+        homepageData: {},
       });
     } finally {
       setLoading(false);
@@ -114,7 +124,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <StatCard
             title="Total Products"
             value={stats.totalProducts}
@@ -136,6 +146,93 @@ const AdminDashboard = () => {
             color="purple"
             link="/admin/inquiries"
           />
+        </div>
+
+        {/* Homepage Content Stats */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <h3 className="text-lg font-medium text-gray-900">
+              Homepage Content
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage featured content on your homepage
+            </p>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex items-center p-4 bg-blue-50 rounded-lg">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                  <span className="text-xl">💎</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Featured Gems</h4>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {stats.totalFeaturedGems}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center p-4 bg-green-50 rounded-lg">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                  <span className="text-xl">💍</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">
+                    Featured Jewelry
+                  </h4>
+                  <p className="text-2xl font-bold text-green-600">
+                    {stats.totalFeaturedJewelry}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center p-4 bg-purple-50 rounded-lg">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                  <span className="text-xl">📚</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Collections</h4>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {stats.totalCollections}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center p-4 bg-orange-50 rounded-lg">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                  <span className="text-xl">🎯</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Promotions</h4>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {stats.totalPromotions}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Link
+                to="/admin/homepage"
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                  />
+                </svg>
+                Manage Homepage Content
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Recent Activity */}
@@ -253,7 +350,7 @@ const AdminDashboard = () => {
             <h3 className="text-lg font-medium text-gray-900">Quick Actions</h3>
           </div>
           <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link
                 to="/admin/products"
                 className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
@@ -280,6 +377,23 @@ const AdminDashboard = () => {
                   <h4 className="font-medium text-gray-900">Manage Blogs</h4>
                   <p className="text-sm text-gray-500">
                     Create and edit blog posts
+                  </p>
+                </div>
+              </Link>
+
+              <Link
+                to="/admin/homepage"
+                className="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
+                  <span className="text-xl">🏠</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">
+                    Homepage Content
+                  </h4>
+                  <p className="text-sm text-gray-500">
+                    Manage featured content
                   </p>
                 </div>
               </Link>
