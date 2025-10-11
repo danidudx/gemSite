@@ -1,6 +1,10 @@
 import { useState } from "react";
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "../firebase";
+import {
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth } from "../config/firebase";
 import { Link, useNavigate } from "react-router-dom";
 import { FaFacebookF, FaGoogle } from "react-icons/fa";
 
@@ -11,7 +15,7 @@ export default function Login() {
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
 
- const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async () => {
     setError("");
     try {
       await signInWithPopup(auth, provider);
@@ -21,7 +25,7 @@ export default function Login() {
     }
   };
 
- const handleLogin = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     try {
@@ -40,7 +44,9 @@ export default function Login() {
         </button>
 
         <h2 className="text-2xl font-semibold text-center mb-6">LOGIN</h2>
-        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+        )}
 
         <form onSubmit={handleLogin}>
           <div className="mb-4">
@@ -54,21 +60,24 @@ export default function Login() {
             />
           </div>
 
-        <div className="mb-4">
-  <div className="flex justify-between items-center">
-    <label className="block text-sm mb-1">Password</label>
-    <Link to="/forgot-password" className="text-sm text-gray-500 hover:underline">
-      Forgot password?
-    </Link>
-  </div>
-  <input
-    type="password"
-    className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    required
-  />
-</div>
+          <div className="mb-4">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm mb-1">Password</label>
+              <Link
+                to="/forgot-password"
+                className="text-sm text-gray-500 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
+            <input
+              type="password"
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
           <button
             type="submit"
@@ -98,7 +107,10 @@ export default function Login() {
 
         <p className="text-center text-sm mt-6">
           Don’t have an account?{" "}
-          <Link to="/register" className="text-indigo-600 font-semibold hover:underline">
+          <Link
+            to="/register"
+            className="text-indigo-600 font-semibold hover:underline"
+          >
             Sign Up
           </Link>
         </p>

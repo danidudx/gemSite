@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../config/firebase";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Register() {
@@ -30,7 +30,9 @@ export default function Register() {
         </button>
 
         <h2 className="text-2xl font-semibold text-center mb-6">SIGN UP</h2>
-        {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
+        {error && (
+          <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+        )}
 
         <form onSubmit={handleRegister}>
           {/* First + Last Name */}
@@ -83,15 +85,23 @@ export default function Register() {
 
           {/* Checkbox */}
           <div className="flex items-start mb-4">
-            <input type="checkbox" className="mt-1 mr-2 w-4 h-4 border rounded" />
+            <input
+              type="checkbox"
+              className="mt-1 mr-2 w-4 h-4 border rounded"
+            />
             <p className="text-sm text-gray-600">
-              Sign me up for product updates and promotions. You can unsubscribe at any time.
+              Sign me up for product updates and promotions. You can unsubscribe
+              at any time.
             </p>
           </div>
 
           {/* Privacy Note */}
           <p className="text-xs text-gray-500 mb-4">
-            See <Link to="/privacy" className="underline">Privacy Policy</Link> for additional information.
+            See{" "}
+            <Link to="/privacy" className="underline">
+              Privacy Policy
+            </Link>{" "}
+            for additional information.
           </p>
 
           {/* Captcha Placeholder */}
@@ -144,7 +154,10 @@ export default function Register() {
         {/* Footer Link */}
         <p className="text-center text-sm mt-6">
           Already have an account?{" "}
-          <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
+          <Link
+            to="/login"
+            className="text-indigo-600 font-semibold hover:underline"
+          >
             Login
           </Link>
         </p>

@@ -1,7 +1,7 @@
 // src/pages/ForgotPassword.jsx
 import { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../config/firebase";
 import { Link } from "react-router-dom";
 
 export default function ForgotPassword() {
@@ -40,8 +40,10 @@ export default function ForgotPassword() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-2">FORGOT PASSWORD?</h2>
-        
+        <h2 className="text-2xl font-semibold text-center mb-2">
+          FORGOT PASSWORD?
+        </h2>
+
         <p className="text-center text-gray-600 mb-8">
           To reset your password, please enter your email address
         </p>
@@ -60,7 +62,9 @@ export default function ForgotPassword() {
 
         <form onSubmit={handlePasswordReset}>
           <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Email Address</label>
+            <label className="block text-sm font-medium mb-2">
+              Email Address
+            </label>
             <input
               type="email"
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
@@ -82,7 +86,10 @@ export default function ForgotPassword() {
 
         <p className="text-center text-sm text-gray-600">
           Remember your password?{" "}
-          <Link to="/login" className="text-indigo-600 font-semibold hover:underline">
+          <Link
+            to="/login"
+            className="text-indigo-600 font-semibold hover:underline"
+          >
             Login
           </Link>
         </p>
