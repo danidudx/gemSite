@@ -21,15 +21,22 @@ const BlogForm = ({ blog, onSubmit, onCancel }) => {
 
   useEffect(() => {
     if (blog) {
+      // Ensure image URL is properly formatted
+      const imageUrl = blog.featuredImage
+        ? blog.featuredImage.startsWith("http")
+          ? blog.featuredImage
+          : `http://localhost:5000${blog.featuredImage}`
+        : "";
+
       setFormData({
         title: blog.title || "",
         content: blog.content || "",
         excerpt: blog.excerpt || "",
         author: blog.author || "",
-        featuredImage: blog.featuredImage || "",
+        featuredImage: imageUrl,
         tags: blog.tags || [],
       });
-      setFeaturedImageFile(blog.featuredImage || null);
+      setFeaturedImageFile(imageUrl || null);
     }
   }, [blog]);
 
@@ -57,11 +64,23 @@ const BlogForm = ({ blog, onSubmit, onCancel }) => {
       }
 
       const result = await uploadFileToBackend(file, "image");
+      console.log("Upload result:", result);
+
+      // For now, use the local blob URL for immediate preview
+      // The backend URL will be used for saving to database
+      const localUrl = URL.createObjectURL(file);
+      const backendUrl = result.url.startsWith("http")
+        ? result.url
+        : `http://localhost:5000${result.url}`;
+
+      console.log("Local URL for preview:", localUrl);
+      console.log("Backend URL for saving:", backendUrl);
+
       setFormData((prev) => ({
         ...prev,
-        featuredImage: result.url,
+        featuredImage: backendUrl, // Use backend URL for saving
       }));
-      setFeaturedImageFile(result.url); // Store the file URL for display
+      setFeaturedImageFile(localUrl); // Use local URL for immediate preview
       showNotification("Featured image uploaded successfully", "success");
     } catch (err) {
       const errorMessage = err.message || "Failed to upload featured image";
@@ -124,6 +143,10 @@ const BlogForm = ({ blog, onSubmit, onCancel }) => {
         ...formData,
         publishedAt: new Date().toISOString(),
       };
+
+      console.log("BlogForm: Submitting data:", submitData);
+      console.log("BlogForm: PublishedAt type:", typeof submitData.publishedAt);
+      console.log("BlogForm: PublishedAt value:", submitData.publishedAt);
 
       await onSubmit(submitData);
       showNotification(

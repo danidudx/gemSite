@@ -23,26 +23,26 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
+      console.log("Fetching dashboard data...");
 
-      // Fetch products
-      const productsResponse = await api.getProducts({ limit: 5 });
+      // Use the new dashboard stats method
+      const statsData = await api.getDashboardStats();
+      console.log("Dashboard stats:", statsData);
 
-      // Fetch blogs
-      const blogsResponse = await api.getBlogs({ limit: 5 });
-
-      // Mock data for inquiries (replace with actual API call)
-      const inquiriesResponse = { inquiries: [] };
-
-      setStats({
-        totalProducts: productsResponse.total || 0,
-        totalBlogs: blogsResponse.total || 0,
-        totalInquiries: inquiriesResponse.total || 0,
-        recentProducts: productsResponse.products || [],
-        recentBlogs: blogsResponse.blogs || [],
-        recentInquiries: inquiriesResponse.inquiries || [],
-      });
+      setStats(statsData);
     } catch (err) {
+      console.error("Dashboard data fetch error:", err);
       setError(err.message);
+
+      // Set fallback data when API calls fail
+      setStats({
+        totalProducts: 0,
+        totalBlogs: 0,
+        totalInquiries: 0,
+        recentProducts: [],
+        recentBlogs: [],
+        recentInquiries: [],
+      });
     } finally {
       setLoading(false);
     }
@@ -77,11 +77,33 @@ const AdminDashboard = () => {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Welcome to your admin dashboard. Here's an overview of your site.
-          </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Welcome to your admin dashboard. Here's an overview of your site.
+            </p>
+          </div>
+          <button
+            onClick={fetchDashboardData}
+            disabled={loading}
+            className="flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            <svg
+              className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            {loading ? "Refreshing..." : "Refresh"}
+          </button>
         </div>
 
         {/* Error Message */}

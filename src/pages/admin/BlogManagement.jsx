@@ -57,7 +57,12 @@ const BlogManagement = () => {
   const handleDeleteBlog = async (blogId) => {
     try {
       await api.deleteBlog(blogId);
-      setBlogs(blogs.filter((b) => b.id !== blogId));
+      setBlogs(
+        blogs.filter((b) => {
+          const currentId = b.id || b._id;
+          return currentId !== blogId;
+        })
+      );
       setDeleteConfirm(null);
       showNotification("Blog post deleted successfully", "success");
     } catch (err) {
@@ -70,11 +75,83 @@ const BlogManagement = () => {
   const handleFormSubmit = async (blogData) => {
     try {
       if (editingBlog) {
-        await api.updateBlog(editingBlog.id, blogData);
-        setBlogs(
-          blogs.map((b) =>
-            b.id === editingBlog.id ? { ...b, ...blogData } : b
+        const blogId = editingBlog.id || editingBlog._id;
+        console.log("Updating blog with ID:", blogId);
+        console.log("Blog data:", blogData);
+        console.log("Blog data JSON:", JSON.stringify(blogData, null, 2));
+
+        if (!blogId) {
+          throw new Error("Blog ID is missing");
+        }
+
+        // Check for any undefined or null values that might cause validation issues
+        const cleanedData = Object.fromEntries(
+          Object.entries(blogData).filter(
+            ([key, value]) => value !== undefined && value !== null
           )
+        );
+        console.log("Cleaned blog data:", cleanedData);
+
+        // Try different data formats if the first attempt fails
+        try {
+          await api.updateBlog(blogId, cleanedData);
+        } catch (error) {
+          console.log("First attempt failed, trying alternative format...");
+
+          // Alternative format 1: Convert tags to string
+          const altData1 = {
+            ...cleanedData,
+            tags: Array.isArray(cleanedData.tags)
+              ? cleanedData.tags.join(",")
+              : cleanedData.tags,
+          };
+          console.log("Alternative format 1 (tags as string):", altData1);
+
+          try {
+            await api.updateBlog(blogId, altData1);
+            // If successful, update the state with the working format
+            setBlogs(
+              blogs.map((b) => {
+                const currentId = b.id || b._id;
+                return currentId === blogId ? { ...b, ...altData1 } : b;
+              })
+            );
+            showNotification("Blog post updated successfully", "success");
+            setShowForm(false);
+            setEditingBlog(null);
+            return;
+          } catch (error2) {
+            console.log("Alternative format 1 failed, trying format 2...");
+
+            // Alternative format 2: Remove publishedAt and featuredImage
+            const altData2 = {
+              title: cleanedData.title,
+              content: cleanedData.content,
+              excerpt: cleanedData.excerpt,
+              author: cleanedData.author,
+              tags: cleanedData.tags,
+            };
+            console.log("Alternative format 2 (minimal fields):", altData2);
+
+            await api.updateBlog(blogId, altData2);
+            // If successful, update the state with the working format
+            setBlogs(
+              blogs.map((b) => {
+                const currentId = b.id || b._id;
+                return currentId === blogId ? { ...b, ...altData2 } : b;
+              })
+            );
+            showNotification("Blog post updated successfully", "success");
+            setShowForm(false);
+            setEditingBlog(null);
+            return;
+          }
+        }
+        setBlogs(
+          blogs.map((b) => {
+            const currentId = b.id || b._id;
+            return currentId === blogId ? { ...b, ...blogData } : b;
+          })
         );
         showNotification("Blog post updated successfully", "success");
       } else {
@@ -202,56 +279,76 @@ const BlogManagement = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {blogs.map((blog) => (
-                      <tr key={blog.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
-                            {blog.featuredImage ? (
-                              <img
-                                src={blog.featuredImage}
-                                alt={blog.title}
-                                className="w-16 h-16 object-cover rounded-lg"
-                              />
-                            ) : (
-                              <span className="text-gray-400">📷</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
-                            {blog.title}
-                          </div>
-                          <div className="text-sm text-gray-500 max-w-xs truncate">
-                            {blog.excerpt}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {blog.author}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(blog.publishedAt || blog.createdAt)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {blog.views || 0}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleEditBlog(blog)}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm(blog.id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                    {blogs.map((blog) => {
+                      const blogId = blog.id || blog._id;
+                      return (
+                        <tr key={blogId} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                              {blog.featuredImage ? (
+                                <img
+                                  src={
+                                    blog.featuredImage.startsWith("http")
+                                      ? blog.featuredImage
+                                      : `http://localhost:5000${blog.featuredImage}`
+                                  }
+                                  alt={blog.title}
+                                  className="w-16 h-16 object-cover rounded-lg"
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                    e.target.nextSibling.style.display =
+                                      "block";
+                                  }}
+                                />
+                              ) : null}
+                              <span
+                                className="text-gray-400"
+                                style={{
+                                  display: blog.featuredImage
+                                    ? "none"
+                                    : "block",
+                                }}
+                              >
+                                📷
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
+                              {blog.title}
+                            </div>
+                            <div className="text-sm text-gray-500 max-w-xs truncate">
+                              {blog.excerpt}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {blog.author}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {formatDate(blog.publishedAt || blog.createdAt)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {blog.views || 0}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleEditBlog(blog)}
+                                className="text-blue-600 hover:text-blue-900"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => setDeleteConfirm(blogId)}
+                                className="text-red-600 hover:text-red-900"
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

@@ -86,6 +86,10 @@ class ApiService {
   }
 
   async updateBlog(id, blogData) {
+    console.log("API: Updating blog with ID:", id);
+    console.log("API: Blog data being sent:", blogData);
+    console.log("API: JSON stringified:", JSON.stringify(blogData));
+
     return this.request(`/content/blogs/${id}`, {
       method: "PUT",
       body: JSON.stringify(blogData),
@@ -109,6 +113,36 @@ class ApiService {
       headers: {}, // Let browser set Content-Type for FormData
       body: formData,
     });
+  }
+
+  // Dashboard Statistics
+  async getDashboardStats() {
+    try {
+      const [productsResponse, blogsResponse] = await Promise.all([
+        this.getProducts({ limit: 1000 }), // Get all products for count
+        this.getBlogs({ limit: 1000 }), // Get all blogs for count
+      ]);
+
+      return {
+        totalProducts:
+          productsResponse.total ||
+          productsResponse.totalProducts ||
+          (productsResponse.products ? productsResponse.products.length : 0) ||
+          (Array.isArray(productsResponse) ? productsResponse.length : 0),
+        totalBlogs:
+          blogsResponse.total ||
+          blogsResponse.totalBlogs ||
+          (blogsResponse.blogs ? blogsResponse.blogs.length : 0) ||
+          (Array.isArray(blogsResponse) ? blogsResponse.length : 0),
+        totalInquiries: 0, // Mock data for now
+        recentProducts: productsResponse.products || productsResponse || [],
+        recentBlogs: blogsResponse.blogs || blogsResponse || [],
+        recentInquiries: [],
+      };
+    } catch (error) {
+      console.error("Failed to fetch dashboard stats:", error);
+      throw error;
+    }
   }
 }
 
