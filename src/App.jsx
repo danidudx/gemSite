@@ -9,6 +9,7 @@ import { NotificationProvider } from "./contexts/NotificationContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/customer/Home";
 import Products from "./pages/customer/Products";
+import ProductDetail from "./pages/customer/ProductDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductManagement from "./pages/admin/ProductManagement";
 import BlogManagement from "./pages/admin/BlogManagement";
@@ -42,6 +43,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Products />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products/:id"
+              element={
+                <ProtectedRoute>
+                  <ProductDetail />
                 </ProtectedRoute>
               }
             />

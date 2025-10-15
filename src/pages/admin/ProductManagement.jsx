@@ -17,6 +17,7 @@ const ProductManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [goToPage, setGoToPage] = useState("");
   const { showNotification } = useNotification();
 
   const productsPerPage = 10;
@@ -43,7 +44,16 @@ const ProductManagement = () => {
 
       const response = await api.getProducts(params);
       setProducts(response.products || []);
-      setTotalPages(response.totalPages || 1);
+
+      // Handle different pagination response structures
+      if (response.pagination) {
+        const totalPages =
+          response.pagination.pages || response.pagination.totalPages || 1;
+        setTotalPages(totalPages);
+      } else {
+        const totalPages = response.totalPages || response.pages || 1;
+        setTotalPages(totalPages);
+      }
     } catch (err) {
       const errorMessage = err.message || "Failed to fetch products";
       setError(errorMessage);
@@ -105,6 +115,20 @@ const ProductManagement = () => {
       const errorMessage = err.message || "Failed to save product";
       setError(errorMessage);
       showNotification(errorMessage, "error");
+    }
+  };
+
+  const handleGoToPage = (e) => {
+    e.preventDefault();
+    const page = parseInt(goToPage);
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      setGoToPage("");
+    } else {
+      showNotification(
+        `Please enter a page number between 1 and ${totalPages}`,
+        "error"
+      );
     }
   };
 
@@ -487,11 +511,37 @@ const ProductManagement = () => {
                           {totalPages}
                         </span>
                         <span className="text-gray-500 ml-2">
-                          ({products.length} products)
+                          ({products.length} products on this page)
                         </span>
                       </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {productsPerPage} products per page
+                      </p>
                     </div>
-                    <div>
+                    <div className="flex items-center space-x-4">
+                      {/* Go to page input */}
+                      <form
+                        onSubmit={handleGoToPage}
+                        className="flex items-center space-x-2"
+                      >
+                        <label className="text-sm text-gray-700">Go to:</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max={totalPages}
+                          value={goToPage}
+                          onChange={(e) => setGoToPage(e.target.value)}
+                          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Page"
+                        />
+                        <button
+                          type="submit"
+                          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          Go
+                        </button>
+                      </form>
+
                       <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
                         <button
                           onClick={() =>
