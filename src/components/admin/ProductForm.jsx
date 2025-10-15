@@ -41,7 +41,20 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [certificateFile, setCertificateFile] = useState(null);
   const [previewImages, setPreviewImages] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
+  const [uploadingImages, setUploadingImages] = useState(false);
   const { showNotification } = useNotification();
+
+  // Helper function to format image URLs
+  const formatImageUrl = (url) => {
+    if (!url) return "";
+    if (url.startsWith("http")) {
+      return url;
+    } else if (url.startsWith("/")) {
+      return `http://localhost:5000${url}`;
+    } else {
+      return `http://localhost:5000/${url}`;
+    }
+  };
 
   useEffect(() => {
     if (product) {
@@ -54,6 +67,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
           ...product.specifications,
         },
       });
+
+      // Set preview images for existing product images
+      if (product.images && product.images.length > 0) {
+        const imageUrls = product.images.map((img) => formatImageUrl(img));
+        setPreviewImages(imageUrls);
+      }
+
+      // Set 360° image preview for existing product
+      if (product.image360) {
+        const image360Url = formatImageUrl(product.image360);
+        setImage360File(image360Url);
+      }
     }
   }, [product]);
 
@@ -105,12 +130,14 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
 
   const handleImageUpload = async (files) => {
     try {
-      setLoading(true);
+      setUploadingImages(true);
 
       // Create immediate preview URLs for all files
       const localUrls = Array.from(files).map((file) =>
         URL.createObjectURL(file)
       );
+
+      // Add local previews immediately
       setPreviewImages((prev) => [...prev, ...localUrls]);
 
       const uploadPromises = Array.from(files).map(async (file) => {
@@ -129,17 +156,34 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       });
 
       const uploadedImages = await Promise.all(uploadPromises);
+      const newImageUrls = uploadedImages.map((img) => formatImageUrl(img.url));
+
+      // Update form data with uploaded URLs
       setFormData((prev) => ({
         ...prev,
-        images: [...prev.images, ...uploadedImages.map((img) => img.url)],
+        images: [...prev.images, ...newImageUrls],
       }));
+
+      // Replace local preview URLs with server URLs
+      setPreviewImages((prev) => {
+        const startIndex = prev.length - files.length;
+        const beforeNewImages = prev.slice(0, startIndex);
+        return [...beforeNewImages, ...newImageUrls];
+      });
+
+      // Clean up local blob URLs
+      localUrls.forEach((url) => URL.revokeObjectURL(url));
+
       showNotification("Images uploaded successfully", "success");
     } catch (err) {
       const errorMessage = err.message || "Failed to upload images";
       setError(errorMessage);
       showNotification(errorMessage, "error");
+
+      // Remove the failed preview images
+      setPreviewImages((prev) => prev.slice(0, -files.length));
     } finally {
-      setLoading(false);
+      setUploadingImages(false);
     }
   };
 
@@ -163,9 +207,10 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       }
 
       const result = await uploadFileToBackend(file, "image");
+      const formattedUrl = formatImageUrl(result.url);
       setFormData((prev) => ({
         ...prev,
-        image360: result.url,
+        image360: formattedUrl,
       }));
       showNotification("360° image uploaded successfully", "success");
     } catch (err) {
@@ -208,10 +253,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   };
 
   const removeImage = (index) => {
+    // Remove from both formData.images and previewImages
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+
+    // Revoke the object URL if it's a local preview
+    const imageToRemove = previewImages[index];
+    if (imageToRemove && imageToRemove.startsWith("blob:")) {
+      URL.revokeObjectURL(imageToRemove);
+    }
+
     setPreviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -542,75 +595,75 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             </label>
             <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
               <div className="space-y-1 text-center">
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 48 48"
-                >
-                  <path
-                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                <div className="flex text-sm text-gray-600">
-                  <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
-                    <span>Upload images</span>
-                    <input
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e.target.files)}
-                      className="sr-only"
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
-                </div>
-                <p className="text-xs text-gray-500">
-                  PNG, JPG, GIF up to 10MB each
-                </p>
+                {uploadingImages ? (
+                  <>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-sm text-gray-600">Uploading images...</p>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="mx-auto h-12 w-12 text-gray-400"
+                      stroke="currentColor"
+                      fill="none"
+                      viewBox="0 0 48 48"
+                    >
+                      <path
+                        d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                    <div className="flex text-sm text-gray-600">
+                      <label className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+                        <span>Upload images</span>
+                        <input
+                          type="file"
+                          multiple
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e.target.files)}
+                          className="sr-only"
+                          disabled={uploadingImages}
+                        />
+                      </label>
+                      <p className="pl-1">or drag and drop</p>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      PNG, JPG, GIF up to 10MB each
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
-            {(formData.images.length > 0 || previewImages.length > 0) && (
+            {previewImages.length > 0 && (
               <div className="mt-4 grid grid-cols-4 gap-4">
-                {formData.images.map((image, index) => (
-                  <div key={`uploaded-${index}`} className="relative">
+                {previewImages.map((image, index) => (
+                  <div key={`image-${index}`} className="relative">
                     <img
                       src={image}
                       alt={`Product ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
+                      className="w-full h-24 object-cover rounded-lg border border-gray-300"
+                      onError={(e) => {
+                        console.error(
+                          `Failed to load image at index ${index}:`,
+                          image
+                        );
+                        e.target.style.display = "none";
+                        e.target.nextSibling.style.display = "flex";
+                      }}
                     />
+                    <div
+                      className="w-full h-24 bg-gray-200 rounded-lg border border-gray-300 items-center justify-center text-gray-500 text-sm"
+                      style={{ display: "none" }}
+                    >
+                      Failed to load
+                    </div>
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-                {previewImages.map((image, index) => (
-                  <div key={`preview-${index}`} className="relative">
-                    <img
-                      src={image}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPreviewImages((prev) =>
-                          prev.filter((_, i) => i !== index)
-                        );
-                        setFormData((prev) => ({
-                          ...prev,
-                          images: prev.images.filter((_, i) => i !== index),
-                        }));
-                      }}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
                     >
                       ×
                     </button>
@@ -659,11 +712,23 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
 
             {(formData.image360 || image360File) && (
               <div className="mt-4">
-                <img
-                  src={formData.image360 || image360File}
-                  alt="360° view"
-                  className="w-32 h-32 object-cover rounded-lg"
-                />
+                <div className="relative inline-block">
+                  <img
+                    src={formData.image360 || image360File}
+                    alt="360° view"
+                    className="w-32 h-32 object-cover rounded-lg"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, image360: "" }));
+                      setImage360File(null);
+                    }}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
             )}
           </div>
