@@ -45,11 +45,19 @@ export default function ProductCard({
 
   const getImageUrl = () => {
     if (product.images && product.images.length > 0) {
-      return product.images[0].startsWith("http")
-        ? product.images[0]
-        : `http://localhost:5000${product.images[0]}`;
+      const imageUrl = product.images[0];
+      // Check if it's already a full URL
+      if (imageUrl.startsWith("http")) {
+        return imageUrl;
+      }
+      // If it starts with /uploads, it's a server path
+      if (imageUrl.startsWith("/uploads")) {
+        return `http://localhost:5000${imageUrl}`;
+      }
+      // If it's a relative path, prepend the server URL
+      return `http://localhost:5000/${imageUrl}`;
     }
-    return "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop";
+    return ""; // Empty string for fallback
   };
 
   const getRarityColor = (rarity) => {
@@ -87,11 +95,17 @@ export default function ProductCard({
     >
       {/* Product Image Container */}
       <div className="relative aspect-square overflow-hidden">
-        <img
-          src={getImageUrl()}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-        />
+        {getImageUrl() ? (
+          <img
+            src={getImageUrl()}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-400 text-sm">No Image</span>
+          </div>
+        )}
 
         {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

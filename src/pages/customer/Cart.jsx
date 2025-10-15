@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
 import { useNotification } from "../../contexts/NotificationContext";
-import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, MessageCircle } from "lucide-react";
 import Header from "../../components/common/Header";
 import Footer from "../../components/common/Footer";
 
@@ -71,6 +71,55 @@ export default function Cart() {
     }).format(price);
   };
 
+  const getImageUrl = (product) => {
+    // Debug: Log the product structure to understand the API response
+    console.log("Cart product structure:", product);
+    console.log("Product image field:", product.image);
+    console.log("Product images field:", product.images);
+
+    // Cart API uses 'image' (singular), Products API uses 'images' (plural array)
+    let imageUrl = null;
+
+    if (product.image) {
+      // Cart API structure
+      imageUrl = product.image;
+      console.log("Using cart API image:", imageUrl);
+    } else if (product.images && product.images.length > 0) {
+      // Products API structure
+      imageUrl = product.images[0];
+      console.log("Using products API image:", imageUrl);
+    }
+
+    if (imageUrl) {
+      // Check if it's already a full URL
+      if (imageUrl.startsWith("http")) {
+        console.log("Using full URL:", imageUrl);
+        return imageUrl;
+      }
+      // If it starts with /uploads, it's a server path
+      if (imageUrl.startsWith("/uploads")) {
+        const fullUrl = `http://localhost:5000${imageUrl}`;
+        console.log("Using server path:", fullUrl);
+        return fullUrl;
+      }
+      // If it's a relative path, prepend the server URL
+      const fullUrl = `http://localhost:5000/${imageUrl}`;
+      console.log("Using relative path:", fullUrl);
+      return fullUrl;
+    }
+
+    console.log("No image found, using fallback");
+    return ""; // Empty string for fallback
+  };
+
+  const handleInquireAndBuy = (product) => {
+    showNotification(
+      `Inquiry and buy request sent for ${product.name}`,
+      "success"
+    );
+    // TODO: Implement inquire and buy functionality
+  };
+
   if (loading && cart.items.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -128,105 +177,98 @@ export default function Cart() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Cart Items */}
-              <div className="lg:col-span-2">
-                <div className="space-y-4">
-                  {cart.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
-                    >
-                      <div className="flex items-center space-x-4">
+            <div className="space-y-6">
+              {cart.items.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center space-y-4 lg:space-y-0 lg:space-x-6">
+                    {/* Product Image */}
+                    <div className="flex-shrink-0">
+                      {getImageUrl(item.product) ? (
                         <img
-                          src={item.product.image || "/placeholder-image.jpg"}
+                          src={getImageUrl(item.product)}
                           alt={item.product.name}
-                          className="w-20 h-20 object-cover rounded-lg"
+                          className="w-32 h-32 object-cover rounded-lg"
                         />
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {item.product.name}
-                          </h3>
-                          <p className="text-gray-600">
-                            {formatPrice(item.product.price)}
-                          </p>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(item.id, item.quantity - 1)
-                            }
-                            disabled={updatingItems.has(item.id)}
-                            className="p-2 rounded-full border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-                          >
-                            <Minus size={16} />
-                          </button>
-                          <span className="w-12 text-center font-medium">
-                            {item.quantity}
+                      ) : (
+                        <div className="w-32 h-32 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <span className="text-gray-400 text-sm">
+                            No Image
                           </span>
-                          <button
-                            onClick={() =>
-                              handleQuantityChange(item.id, item.quantity + 1)
-                            }
-                            disabled={updatingItems.has(item.id)}
-                            className="p-2 rounded-full border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-                          >
-                            <Plus size={16} />
-                          </button>
                         </div>
-                        <div className="text-right">
-                          <p className="text-lg font-semibold text-gray-900">
-                            {formatPrice(item.product.price * item.quantity)}
-                          </p>
-                          <button
-                            onClick={() => handleRemoveItem(item.id)}
-                            className="text-red-600 hover:text-red-700 mt-2"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Order Summary */}
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 sticky top-4">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                    Order Summary
-                  </h2>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">
-                        Items ({cart.totalItems})
-                      </span>
-                      <span className="font-medium">
-                        {formatPrice(cart.estimatedTotal)}
-                      </span>
+                    {/* Product Details */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        {item.product.name}
+                      </h3>
+                      <p className="text-gray-600 mb-2">
+                        Unit Price: {formatPrice(item.product.price)}
+                      </p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        Total: {formatPrice(item.product.price * item.quantity)}
+                      </p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Shipping</span>
-                      <span className="font-medium text-green-600">Free</span>
+
+                    {/* Quantity Controls */}
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.quantity - 1)
+                        }
+                        disabled={updatingItems.has(item.id)}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        <Minus size={16} />
+                      </button>
+                      <span className="w-12 text-center font-medium text-lg">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.quantity + 1)
+                        }
+                        disabled={updatingItems.has(item.id)}
+                        className="p-2 rounded-full border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+                      >
+                        <Plus size={16} />
+                      </button>
                     </div>
-                    <div className="border-t pt-3">
-                      <div className="flex justify-between text-lg font-semibold">
-                        <span>Total</span>
-                        <span>{formatPrice(cart.estimatedTotal)}</span>
-                      </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col space-y-3 lg:space-y-2">
+                      <button
+                        onClick={() => handleInquireAndBuy(item.product)}
+                        className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                      >
+                        <MessageCircle size={18} className="mr-2" />
+                        Inquire and Buy
+                      </button>
+                      <button
+                        onClick={() => handleRemoveItem(item.id)}
+                        className="flex items-center justify-center px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Remove
+                      </button>
                     </div>
                   </div>
-                  <button className="w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-                    Proceed to Checkout
-                  </button>
-                  <Link
-                    to="/products"
-                    className="block w-full mt-3 text-center text-blue-600 hover:text-blue-700 font-medium"
-                  >
-                    Continue Shopping
-                  </Link>
                 </div>
+              ))}
+
+              {/* Continue Shopping Link */}
+              <div className="text-center pt-6">
+                <Link
+                  to="/products"
+                  className="inline-flex items-center px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <ShoppingBag className="mr-2" size={20} />
+                  Continue Shopping
+                </Link>
               </div>
             </div>
           )}
