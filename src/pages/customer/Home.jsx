@@ -1,6 +1,5 @@
 import Header from "../../components/common/Header";
 import Footer from "../../components/common/Footer";
-import UserProfile from "../../components/common/UserProfile";
 import HeroSection from "../../components/customer/HeroSection";
 import FeaturedProducts from "../../components/customer/FeaturedProducts";
 import CreativeStudio from "../../components/customer/CreativeStudio";
@@ -15,9 +14,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        <UserProfile />
-      </div>
       <HeroSection />
       <FeaturedProducts />
       <CreativeStudio />
