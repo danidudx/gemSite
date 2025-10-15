@@ -151,10 +151,6 @@ export default function Products() {
     navigate(`/products/${product._id}`);
   };
 
-  const handleAddToCart = (product) => {
-    showNotification(`${product.name} added to cart`, "success");
-  };
-
   const handleToggleFavorite = (productId, isFavorite) => {
     showNotification(
       isFavorite ? "Added to favorites" : "Removed from favorites",
@@ -166,7 +162,7 @@ export default function Products() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="flex">
+      <div className="flex content-with-header">
         {/* Mobile sidebar overlay */}
         {sidebarOpen && (
           <div
@@ -231,7 +227,6 @@ export default function Products() {
             products={products}
             loading={loading}
             onQuickView={handleQuickView}
-            onAddToCart={handleAddToCart}
             onToggleFavorite={handleToggleFavorite}
             viewMode={viewMode}
             onViewModeChange={handleViewModeChange}

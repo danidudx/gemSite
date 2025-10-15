@@ -127,6 +127,37 @@ class ApiService {
     });
   }
 
+  // Cart Management
+  async getCart() {
+    return this.request("/cart");
+  }
+
+  async addToCart(productId, quantity = 1) {
+    return this.request("/cart", {
+      method: "POST",
+      body: JSON.stringify({ productId, quantity }),
+    });
+  }
+
+  async updateCartItem(itemId, quantity) {
+    return this.request(`/cart/${itemId}`, {
+      method: "PUT",
+      body: JSON.stringify({ quantity }),
+    });
+  }
+
+  async removeFromCart(itemId) {
+    return this.request(`/cart/${itemId}`, {
+      method: "DELETE",
+    });
+  }
+
+  async clearCart() {
+    return this.request("/cart", {
+      method: "DELETE",
+    });
+  }
+
   // Dashboard Statistics
   async getDashboardStats() {
     try {

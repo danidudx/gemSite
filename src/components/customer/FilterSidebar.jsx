@@ -60,7 +60,7 @@ export default function FilterSidebar({
       className={`bg-white border-r border-gray-200 h-full overflow-y-auto transition-all duration-300 ${
         isOpen ? "w-80" : "w-0"
       }`}
-      style={{ minHeight: "100vh" }}
+      style={{ maxHeight: "calc(100vh - 120px)" }}
     >
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">

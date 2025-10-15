@@ -1,13 +1,19 @@
-import { Eye, Star, Heart } from "lucide-react";
+import { Eye, Star, Heart, ShoppingCart } from "lucide-react";
 import { useState } from "react";
+import { useCart } from "../../contexts/CartContext";
+import { useNotification } from "../../contexts/NotificationContext";
+import { useNavigate } from "react-router-dom";
 
 export default function ProductCard({
   product,
   onQuickView,
-  onAddToCart,
   onToggleFavorite,
 }) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const { addToCart } = useCart();
+  const { showNotification } = useNotification();
+  const navigate = useNavigate();
 
   const handleFavoriteToggle = (e) => {
     e.stopPropagation();
@@ -20,9 +26,21 @@ export default function ProductCard({
     onQuickView?.(product);
   };
 
-  const handleAddToCart = (e) => {
+  const handleAddToCart = async (e) => {
     e.stopPropagation();
-    onAddToCart?.(product);
+    setIsAddingToCart(true);
+    try {
+      await addToCart(product._id, 1);
+      showNotification("Item added to cart successfully!", "success");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      showNotification(
+        error.response?.data?.message || "Failed to add item to cart",
+        "error"
+      );
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   const getImageUrl = () => {
@@ -174,9 +192,20 @@ export default function ProductCard({
           </div>
           <button
             onClick={handleAddToCart}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            disabled={isAddingToCart}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
-            Add to Cart
+            {isAddingToCart ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Adding...
+              </>
+            ) : (
+              <>
+                <ShoppingCart size={16} className="mr-2" />
+                Add to Cart
+              </>
+            )}
           </button>
         </div>
       </div>
