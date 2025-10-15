@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import ThemeToggle from "./ThemeToggle";
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,20 +34,20 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         >
-          <div className="absolute inset-0 bg-gray-600 opacity-75"></div>
+          <div className="absolute inset-0 bg-gray-600 dark:bg-gray-800 opacity-75"></div>
         </div>
       )}
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -62,8 +63,8 @@ const AdminLayout = ({ children }) => {
                 to={item.href}
                 className={`flex items-center px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                   isCurrentPath(item.href)
-                    ? "bg-blue-100 text-blue-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"
+                    : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 }`}
                 onClick={() => setSidebarOpen(false)}
               >
@@ -78,10 +79,10 @@ const AdminLayout = ({ children }) => {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 lg:px-6 flex-shrink-0">
+        <div className="sticky top-0 z-40 flex items-center justify-between h-16 px-4 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 lg:px-6 flex-shrink-0">
           <button
             type="button"
-            className="text-gray-500 lg:hidden"
+            className="text-gray-500 dark:text-gray-400 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
@@ -101,6 +102,8 @@ const AdminLayout = ({ children }) => {
           </button>
 
           <div className="flex items-center space-x-4">
+            {/* <ThemeToggle /> */}
+
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-sm font-medium text-white">
@@ -111,18 +114,20 @@ const AdminLayout = ({ children }) => {
                 </span>
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-gray-700">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {user?.firstName && user?.lastName
                     ? `${user.firstName} ${user.lastName}`
                     : user?.displayName || "Admin"}
                 </p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {user?.email}
+                </p>
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <svg
                 className="w-4 h-4 mr-2"

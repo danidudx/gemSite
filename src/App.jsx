@@ -6,6 +6,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { AuthProvider } from "./contexts/AuthContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/customer/Home";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductManagement from "./pages/admin/ProductManagement";
@@ -43,41 +44,51 @@ export default function App() {
             <Route
               path="/admin"
               element={
-                <ProtectedRoute requireAdmin={true}>
-                  <AdminDashboard />
-                </ProtectedRoute>
+                <ThemeProvider>
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                </ThemeProvider>
               }
             />
             <Route
               path="/admin/products"
               element={
-                <ProtectedRoute requireAdmin={true}>
-                  <ProductManagement />
-                </ProtectedRoute>
+                <ThemeProvider>
+                  <ProtectedRoute requireAdmin={true}>
+                    <ProductManagement />
+                  </ProtectedRoute>
+                </ThemeProvider>
               }
             />
             <Route
               path="/admin/blogs"
               element={
-                <ProtectedRoute requireAdmin={true}>
-                  <BlogManagement />
-                </ProtectedRoute>
+                <ThemeProvider>
+                  <ProtectedRoute requireAdmin={true}>
+                    <BlogManagement />
+                  </ProtectedRoute>
+                </ThemeProvider>
               }
             />
             <Route
               path="/admin/inquiries"
               element={
-                <ProtectedRoute requireAdmin={true}>
-                  <InquiryManagement />
-                </ProtectedRoute>
+                <ThemeProvider>
+                  <ProtectedRoute requireAdmin={true}>
+                    <InquiryManagement />
+                  </ProtectedRoute>
+                </ThemeProvider>
               }
             />
             <Route
               path="/admin/homepage"
               element={
-                <ProtectedRoute requireAdmin={true}>
-                  <HomepageManagement />
-                </ProtectedRoute>
+                <ThemeProvider>
+                  <ProtectedRoute requireAdmin={true}>
+                    <HomepageManagement />
+                  </ProtectedRoute>
+                </ThemeProvider>
               }
             />
           </Routes>

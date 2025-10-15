@@ -248,7 +248,7 @@ const HomepageManagement = () => {
         )}
 
         {/* Featured Gems Section */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Featured Gems</h3>
             <p className="mt-1 text-sm text-gray-500">
@@ -410,7 +410,7 @@ const HomepageManagement = () => {
         </div>
 
         {/* Featured Jewelry Section */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">
               Featured Jewelry
@@ -574,7 +574,7 @@ const HomepageManagement = () => {
         </div>
 
         {/* Collections Section */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Collections</h3>
             <p className="mt-1 text-sm text-gray-500">
@@ -744,7 +744,7 @@ const HomepageManagement = () => {
         </div>
 
         {/* Promotions Section */}
-        <div className="bg-white shadow rounded-lg">
+        <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Promotions</h3>
             <p className="mt-1 text-sm text-gray-500">
