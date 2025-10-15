@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { useNotification } from "../../hooks/useNotification";
 import { uploadFileToBackend, validateFile } from "../../utils/fileUpload";
-import { validateProductForm as validateForm } from "../../utils/formValidation";
+import {
+  validateProductForm as validateForm,
+  validateRequired,
+  validateNumber,
+  validateUrl,
+} from "../../utils/formValidation";
 
 const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -57,6 +62,15 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       ...prev,
       [name]: value,
     }));
+
+    // Clear validation error for this field when user starts typing
+    if (validationErrors[name]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
   };
 
   const handleSpecificationChange = (e) => {
@@ -68,6 +82,16 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
         [name]: value,
       },
     }));
+
+    // Clear validation error for this specification field
+    const specErrorKey = `specifications.${name}`;
+    if (validationErrors[specErrorKey]) {
+      setValidationErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[specErrorKey];
+        return newErrors;
+      });
+    }
   };
 
   const handleImageUpload = async (files) => {
@@ -170,6 +194,86 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
     }));
   };
 
+  // Real-time validation functions
+  const validateField = (name, value, specifications = null) => {
+    const errors = {};
+
+    if (name === "price") {
+      const priceError = validateNumber(value, "Price", 0);
+      if (priceError) errors.price = priceError;
+    } else if (
+      name === "name" ||
+      name === "category" ||
+      name === "description"
+    ) {
+      const error = validateRequired(
+        value,
+        name.charAt(0).toUpperCase() + name.slice(1)
+      );
+      if (error) errors[name] = error;
+    } else if (name === "type") {
+      const error = validateRequired(value, "Type");
+      if (error) errors.type = error;
+    } else if (name === "availability") {
+      const error = validateRequired(value, "Availability");
+      if (error) errors.availability = error;
+    } else if (name === "certificateUrl" && value) {
+      const error = validateUrl(value, "Certificate URL");
+      if (error) errors.certificateUrl = error;
+    } else if (specifications && name.startsWith("specifications.")) {
+      const specName = name.replace("specifications.", "");
+      if (specName === "carat" && value) {
+        const error = validateNumber(value, "Carat", 0);
+        if (error) errors[`specifications.${specName}`] = error;
+      } else if (value) {
+        const error = validateRequired(
+          value,
+          specName.charAt(0).toUpperCase() + specName.slice(1)
+        );
+        if (error) errors[`specifications.${specName}`] = error;
+      }
+    }
+
+    return errors;
+  };
+
+  // Helper function to get field validation status
+  const getFieldStatus = (fieldName) => {
+    if (validationErrors[fieldName]) {
+      return "error";
+    }
+    const value = fieldName.startsWith("specifications.")
+      ? formData.specifications[fieldName.replace("specifications.", "")]
+      : formData[fieldName];
+
+    if (value && value.toString().trim() !== "") {
+      return "success";
+    }
+    return "neutral";
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const errors = validateField(name, value, formData.specifications);
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors((prev) => ({ ...prev, ...errors }));
+    }
+  };
+
+  const handleSpecificationBlur = (e) => {
+    const { name, value } = e.target;
+    const errors = validateField(
+      `specifications.${name}`,
+      value,
+      formData.specifications
+    );
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors((prev) => ({ ...prev, ...errors }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -217,13 +321,43 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const isGem = formData.type === "gem";
   const isJewelry = formData.type === "jewelry";
 
+  // Check if form has any validation errors
+  const hasValidationErrors = Object.keys(validationErrors).length > 0;
+
+  // Check if required fields are filled
+  const isFormValid =
+    formData.name &&
+    formData.type &&
+    formData.category &&
+    formData.price &&
+    formData.description &&
+    formData.availability;
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            {product ? "Edit Product" : "Create New Product"}
-          </h2>
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold text-gray-900">
+              {product ? "Edit Product" : "Create New Product"}
+            </h2>
+            {hasValidationErrors && (
+              <div className="flex items-center text-red-600 text-sm">
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                Please fix validation errors
+              </div>
+            )}
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -244,10 +378,13 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 required
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
                   validationErrors.name
                     ? "border-red-300 focus:ring-red-500"
+                    : getFieldStatus("name") === "success"
+                    ? "border-green-300 focus:ring-green-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
               />
@@ -266,6 +403,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 name="type"
                 value={formData.type}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 required
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
                   validationErrors.type
@@ -292,6 +430,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 name="category"
                 value={formData.category}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 required
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
                   validationErrors.category
@@ -315,12 +454,15 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 name="price"
                 value={formData.price}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 required
                 min="0"
                 step="0.01"
                 className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
                   validationErrors.price
                     ? "border-red-300 focus:ring-red-500"
+                    : getFieldStatus("price") === "success"
+                    ? "border-green-300 focus:ring-green-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
               />
@@ -339,13 +481,23 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 name="availability"
                 value={formData.availability}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                  validationErrors.availability
+                    ? "border-red-300 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                }`}
               >
                 <option value="in_stock">In Stock</option>
                 <option value="out_of_stock">Out of Stock</option>
                 <option value="sold">Sold</option>
               </select>
+              {validationErrors.availability && (
+                <p className="mt-1 text-sm text-red-600">
+                  {validationErrors.availability}
+                </p>
+              )}
             </div>
 
             <div>
@@ -480,10 +632,22 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               name="description"
               value={formData.description}
               onChange={handleInputChange}
+              onBlur={handleBlur}
               required
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                validationErrors.description
+                  ? "border-red-300 focus:ring-red-500"
+                  : getFieldStatus("description") === "success"
+                  ? "border-green-300 focus:ring-green-500"
+                  : "border-gray-300 focus:ring-blue-500"
+              }`}
             />
+            {validationErrors.description && (
+              <p className="mt-1 text-sm text-red-600">
+                {validationErrors.description}
+              </p>
+            )}
           </div>
 
           {/* Specifications */}
@@ -503,8 +667,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="color"
                     value={formData.specifications.color}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.color"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.color"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.color"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -515,9 +689,19 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="carat"
                     value={formData.specifications.carat}
                     onChange={handleSpecificationChange}
+                    onBlur={handleSpecificationBlur}
                     step="0.01"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.carat"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.carat"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.carat"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -528,8 +712,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="cut"
                     value={formData.specifications.cut}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.cut"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.cut"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.cut"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -540,8 +734,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="clarity"
                     value={formData.specifications.clarity}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.clarity"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.clarity"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.clarity"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -552,8 +756,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="origin"
                     value={formData.specifications.origin}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.origin"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.origin"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.origin"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -564,8 +778,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="certification"
                     value={formData.specifications.certification}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.certification"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.certification"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.certification"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -576,8 +800,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="shape"
                     value={formData.specifications.shape}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.shape"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.shape"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.shape"]}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -593,8 +827,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="metalType"
                     value={formData.specifications.metalType}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.metalType"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.metalType"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.metalType"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -605,8 +849,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="setting"
                     value={formData.specifications.setting}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.setting"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.setting"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.setting"]}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -617,8 +871,18 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     name="gemstone"
                     value={formData.specifications.gemstone}
                     onChange={handleSpecificationChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onBlur={handleSpecificationBlur}
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                      validationErrors["specifications.gemstone"]
+                        ? "border-red-300 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }`}
                   />
+                  {validationErrors["specifications.gemstone"] && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {validationErrors["specifications.gemstone"]}
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -633,6 +897,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               name="guides"
               value={formData.guides}
               onChange={handleInputChange}
+              onBlur={handleBlur}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -687,6 +952,11 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                 </a>
               </div>
             )}
+            {validationErrors.certificateUrl && (
+              <p className="mt-1 text-sm text-red-600">
+                {validationErrors.certificateUrl}
+              </p>
+            )}
           </div>
 
           {/* Form Actions */}
@@ -700,11 +970,17 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              disabled={loading || hasValidationErrors}
+              className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 ${
+                hasValidationErrors
+                  ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+              } disabled:opacity-50`}
             >
               {loading
                 ? "Saving..."
+                : hasValidationErrors
+                ? "Fix errors to continue"
                 : product
                 ? "Update Product"
                 : "Create Product"}

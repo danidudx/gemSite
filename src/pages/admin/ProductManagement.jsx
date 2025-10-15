@@ -104,6 +104,14 @@ const ProductManagement = () => {
   };
 
   const getAvailabilityBadge = (availability) => {
+    if (!availability) {
+      return (
+        <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+          UNKNOWN
+        </span>
+      );
+    }
+
     const styles = {
       in_stock: "bg-green-100 text-green-800",
       sold: "bg-red-100 text-red-800",
@@ -271,8 +279,11 @@ const ProductManagement = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {products.map((product) => (
-                      <tr key={product.id} className="hover:bg-gray-50">
+                    {products.map((product, index) => (
+                      <tr
+                        key={product.id || `product-${index}`}
+                        className="hover:bg-gray-50"
+                      >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center relative">
                             {(() => {
@@ -302,19 +313,19 @@ const ProductManagement = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-900">
-                            {product.name}
+                            {product.name || "Unnamed Product"}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            {product.type}
+                            {product.type || "unknown"}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {product.category}
+                          {product.category || "Uncategorized"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {formatPrice(product.price)}
+                          {product.price ? formatPrice(product.price) : "N/A"}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           {getAvailabilityBadge(product.availability)}

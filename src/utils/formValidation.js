@@ -128,6 +128,12 @@ export const validateProductForm = (formData) => {
     }
   }
 
+  // Validate certificate URL if provided
+  if (formData.certificateUrl) {
+    const urlError = validateUrl(formData.certificateUrl, "Certificate URL");
+    if (urlError) errors.certificateUrl = urlError;
+  }
+
   return errors;
 };
 
