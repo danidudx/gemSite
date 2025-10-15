@@ -176,12 +176,7 @@ export default function Products() {
           className={`fixed lg:static inset-y-0 left-0 z-50 lg:z-auto ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           } transition-transform duration-300`}
-          style={{ minHeight: "100vh" }}
         >
-          {/* Debug indicator */}
-          <div className="bg-red-500 text-white p-2 text-xs">
-            Sidebar Debug: {sidebarOpen ? "Open" : "Closed"}
-          </div>
           <FilterSidebar
             filters={filters}
             onFilterChange={handleFilterChange}
