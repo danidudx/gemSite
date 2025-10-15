@@ -39,6 +39,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const [imageFiles, setImageFiles] = useState([]);
   const [image360File, setImage360File] = useState(null);
   const [certificateFile, setCertificateFile] = useState(null);
+  const [previewImages, setPreviewImages] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
   const { showNotification } = useNotification();
 
@@ -55,6 +56,14 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       });
     }
   }, [product]);
+
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      previewImages.forEach((url) => URL.revokeObjectURL(url));
+      if (image360File) URL.revokeObjectURL(image360File);
+    };
+  }, [previewImages, image360File]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -97,6 +106,13 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const handleImageUpload = async (files) => {
     try {
       setLoading(true);
+
+      // Create immediate preview URLs for all files
+      const localUrls = Array.from(files).map((file) =>
+        URL.createObjectURL(file)
+      );
+      setPreviewImages((prev) => [...prev, ...localUrls]);
+
       const uploadPromises = Array.from(files).map(async (file) => {
         // Validate file
         const fileError = validateFile(file, {
@@ -130,6 +146,10 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
   const handleImage360Upload = async (file) => {
     try {
       setLoading(true);
+
+      // Create immediate preview URL
+      const localUrl = URL.createObjectURL(file);
+      setImage360File(localUrl);
 
       // Validate file
       const fileError = validateFile(file, {
@@ -192,6 +212,7 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
     }));
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Real-time validation functions
@@ -553,10 +574,10 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               </div>
             </div>
 
-            {formData.images.length > 0 && (
+            {(formData.images.length > 0 || previewImages.length > 0) && (
               <div className="mt-4 grid grid-cols-4 gap-4">
                 {formData.images.map((image, index) => (
-                  <div key={index} className="relative">
+                  <div key={`uploaded-${index}`} className="relative">
                     <img
                       src={image}
                       alt={`Product ${index + 1}`}
@@ -565,6 +586,30 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
+                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {previewImages.map((image, index) => (
+                  <div key={`preview-${index}`} className="relative">
+                    <img
+                      src={image}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-24 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPreviewImages((prev) =>
+                          prev.filter((_, i) => i !== index)
+                        );
+                        setFormData((prev) => ({
+                          ...prev,
+                          images: prev.images.filter((_, i) => i !== index),
+                        }));
+                      }}
                       className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
                     >
                       ×
@@ -612,10 +657,10 @@ const ProductForm = ({ product, onSubmit, onCancel }) => {
               </div>
             </div>
 
-            {formData.image360 && (
+            {(formData.image360 || image360File) && (
               <div className="mt-4">
                 <img
-                  src={formData.image360}
+                  src={formData.image360 || image360File}
                   alt="360° view"
                   className="w-32 h-32 object-cover rounded-lg"
                 />

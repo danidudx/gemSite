@@ -388,6 +388,9 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
                   Recent Products
+                  <span className="text-sm font-normal text-gray-500 ml-2">
+                    (Last 5)
+                  </span>
                 </h3>
                 <Link
                   to="/admin/products"
@@ -399,8 +402,11 @@ const AdminDashboard = () => {
             </div>
             <div className="divide-y divide-gray-200">
               {stats.recentProducts.length > 0 ? (
-                stats.recentProducts.map((product) => (
-                  <div key={product.id} className="px-6 py-4">
+                stats.recentProducts.slice(0, 5).map((product, index) => (
+                  <div
+                    key={product._id || product.id || `product-${index}`}
+                    className="px-6 py-4"
+                  >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center relative">
                         {(() => {
@@ -456,6 +462,9 @@ const AdminDashboard = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">
                   Recent Blog Posts
+                  <span className="text-sm font-normal text-gray-500 ml-2">
+                    (Last 5)
+                  </span>
                 </h3>
                 <Link
                   to="/admin/blogs"
@@ -467,8 +476,11 @@ const AdminDashboard = () => {
             </div>
             <div className="divide-y divide-gray-200">
               {stats.recentBlogs.length > 0 ? (
-                stats.recentBlogs.map((blog) => (
-                  <div key={blog.id} className="px-6 py-4">
+                stats.recentBlogs.slice(0, 5).map((blog, index) => (
+                  <div
+                    key={blog._id || blog.id || `blog-${index}`}
+                    className="px-6 py-4"
+                  >
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
                         {blog.featuredImage ? (

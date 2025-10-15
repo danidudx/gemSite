@@ -361,7 +361,11 @@ const ProductManagement = () => {
 
                               return hasValidImage ? (
                                 <img
-                                  src={product.images[0]}
+                                  src={
+                                    product.images[0].startsWith("http")
+                                      ? product.images[0]
+                                      : `http://localhost:5000${product.images[0]}`
+                                  }
                                   alt=""
                                   className="w-12 h-12 object-cover rounded-lg absolute inset-0"
                                   onError={(e) => {
