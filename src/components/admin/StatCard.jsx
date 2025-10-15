@@ -17,7 +17,42 @@ const StatCard = ({ title, value, icon, color, link }) => {
     yellow: "text-yellow-600",
   };
 
-  const content = (
+  if (link) {
+    return (
+      <Link to={link} className="block hover:opacity-90 transition-opacity">
+        <div className="bg-white overflow-hidden shadow rounded-lg">
+          <div className="p-5">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div
+                  className={`w-8 h-8 rounded-md flex items-center justify-center ${
+                    iconColorClasses[color] || iconColorClasses.blue
+                  }`}
+                >
+                  <span className="text-xl">{icon}</span>
+                </div>
+              </div>
+              <div className="ml-5 w-0 flex-1">
+                <dl>
+                  <dt className="text-sm font-medium text-gray-500 truncate">
+                    {title}
+                  </dt>
+                  <dd className="text-lg font-medium text-gray-900">{value}</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 px-5 py-3">
+            <div className="text-sm">
+              <span className="font-medium text-gray-600">View details</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
+  return (
     <div className="bg-white overflow-hidden shadow rounded-lg">
       <div className="p-5">
         <div className="flex items-center">
@@ -40,30 +75,8 @@ const StatCard = ({ title, value, icon, color, link }) => {
           </div>
         </div>
       </div>
-      {link && (
-        <div className="bg-gray-50 px-5 py-3">
-          <div className="text-sm">
-            <Link
-              to={link}
-              className="font-medium text-gray-600 hover:text-gray-900"
-            >
-              View details
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
-
-  if (link) {
-    return (
-      <Link to={link} className="block hover:opacity-90 transition-opacity">
-        {content}
-      </Link>
-    );
-  }
-
-  return content;
 };
 
 export default StatCard;

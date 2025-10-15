@@ -23,15 +23,20 @@ const HomepageManagement = () => {
   // Product selector popup states
   const [showGemsSelector, setShowGemsSelector] = useState(false);
   const [showJewelrySelector, setShowJewelrySelector] = useState(false);
+  const [showCollectionSelector, setShowCollectionSelector] = useState(false);
   const [selectedGems, setSelectedGems] = useState([]);
   const [selectedJewelry, setSelectedJewelry] = useState([]);
+  const [selectedCollectionProducts, setSelectedCollectionProducts] = useState(
+    []
+  );
+  const [editingCollectionIndex, setEditingCollectionIndex] = useState(null);
 
   // Form states for each section
   const [newCollection, setNewCollection] = useState({
     name: "",
     description: "",
+    type: "gem",
     image: "",
-    link: "",
     products: [],
   });
 
@@ -78,9 +83,8 @@ const HomepageManagement = () => {
     try {
       setSaving(true);
 
-      // Prepare data for saving - convert featured items back to IDs
+      // Prepare data for saving - convert featured items to IDs and collections to new format
       const dataToSave = {
-        ...homepageData,
         featuredGems: editingFeaturedGems
           .split(",")
           .map((id) => id.trim())
@@ -89,6 +93,20 @@ const HomepageManagement = () => {
           .split(",")
           .map((id) => id.trim())
           .filter((id) => id),
+        collections: homepageData.collections.map((collection) => ({
+          name: collection.name,
+          description: collection.description,
+          type: collection.type || "gem", // Default to gem if not specified
+          image: collection.image,
+          products: collection.products || [], // Array of product IDs
+        })),
+        promotions: homepageData.promotions.map((promotion) => ({
+          title: promotion.title,
+          description: promotion.description,
+          image: promotion.image,
+          link: promotion.link,
+          isActive: promotion.isActive,
+        })),
       };
 
       await api.updateHomepage(dataToSave);
@@ -114,8 +132,8 @@ const HomepageManagement = () => {
       setNewCollection({
         name: "",
         description: "",
+        type: "gem",
         image: "",
-        link: "",
         products: [],
       });
       showNotification("Collection added", "success");
@@ -193,6 +211,22 @@ const HomepageManagement = () => {
       ...prev,
       featuredJewelry: products,
     }));
+  };
+
+  const handleCollectionProductSelect = (products) => {
+    setSelectedCollectionProducts(products);
+    if (editingCollectionIndex !== null) {
+      updateCollection(
+        editingCollectionIndex,
+        "products",
+        products.map((p) => p.id || p._id)
+      );
+    } else {
+      setNewCollection((prev) => ({
+        ...prev,
+        products: products.map((p) => p.id || p._id),
+      }));
+    }
   };
 
   if (loading) {
@@ -393,10 +427,15 @@ const HomepageManagement = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-gray-900 truncate">
-                                {gem.name}
+                                {typeof gem.name === "string"
+                                  ? gem.name
+                                  : gem.name?.name || "Unnamed Gem"}
                               </p>
                               <p className="text-sm text-gray-500">
-                                ${gem.price?.toLocaleString()}
+                                $
+                                {typeof gem.price === "number"
+                                  ? gem.price.toLocaleString()
+                                  : "N/A"}
                               </p>
                             </div>
                           </div>
@@ -557,10 +596,15 @@ const HomepageManagement = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium text-gray-900 truncate">
-                                {jewelry.name}
+                                {typeof jewelry.name === "string"
+                                  ? jewelry.name
+                                  : jewelry.name?.name || "Unnamed Jewelry"}
                               </p>
                               <p className="text-sm text-gray-500">
-                                ${jewelry.price?.toLocaleString()}
+                                $
+                                {typeof jewelry.price === "number"
+                                  ? jewelry.price.toLocaleString()
+                                  : "N/A"}
                               </p>
                             </div>
                           </div>
@@ -607,6 +651,24 @@ const HomepageManagement = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Collection Type
+                  </label>
+                  <select
+                    value={newCollection.type}
+                    onChange={(e) =>
+                      setNewCollection((prev) => ({
+                        ...prev,
+                        type: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="gem">Gem Collection</option>
+                    <option value="jewelry">Jewelry Collection</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Image URL
                   </label>
                   <input
@@ -639,30 +701,99 @@ const HomepageManagement = () => {
                     placeholder="Our finest diamond pieces"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Link
-                  </label>
-                  <input
-                    type="text"
-                    value={newCollection.link}
-                    onChange={(e) =>
-                      setNewCollection((prev) => ({
-                        ...prev,
-                        link: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="/collections/diamonds"
-                  />
-                </div>
               </div>
-              <button
-                onClick={addCollection}
-                className="mt-4 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-              >
-                Add Collection
-              </button>
+
+              {/* Selected Products Display for New Collection */}
+              {newCollection.products && newCollection.products.length > 0 && (
+                <div className="mt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      Selected Products:
+                    </span>
+                    <button
+                      onClick={() => {
+                        setNewCollection((prev) => ({ ...prev, products: [] }));
+                        setSelectedCollectionProducts([]);
+                      }}
+                      className="text-xs text-red-600 hover:text-red-800"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {newCollection.products.map((productId, index) => (
+                      <div
+                        key={index}
+                        className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full"
+                      >
+                        <span className="mr-2">📦</span>
+                        <span className="font-mono text-xs">
+                          {typeof productId === "string"
+                            ? productId
+                            : productId?.id || productId?._id || "Unknown"}
+                        </span>
+                        <button
+                          onClick={() => {
+                            const newProducts = newCollection.products.filter(
+                              (_, i) => i !== index
+                            );
+                            setNewCollection((prev) => ({
+                              ...prev,
+                              products: newProducts,
+                            }));
+                          }}
+                          className="ml-2 text-green-600 hover:text-green-800"
+                        >
+                          <svg
+                            className="w-3 h-3"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-between mt-4">
+                <button
+                  onClick={() => {
+                    setEditingCollectionIndex(null);
+                    setShowCollectionSelector(true);
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <span>Select Products</span>
+                </button>
+                <button
+                  onClick={addCollection}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  Add Collection
+                </button>
+              </div>
             </div>
 
             {/* Existing Collections */}
@@ -699,6 +830,21 @@ const HomepageManagement = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Type
+                      </label>
+                      <select
+                        value={collection.type || "gem"}
+                        onChange={(e) =>
+                          updateCollection(index, "type", e.target.value)
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="gem">Gem Collection</option>
+                        <option value="jewelry">Jewelry Collection</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
                         Image URL
                       </label>
                       <input
@@ -723,19 +869,93 @@ const HomepageManagement = () => {
                         rows="2"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Link
-                      </label>
-                      <input
-                        type="text"
-                        value={collection.link}
-                        onChange={(e) =>
-                          updateCollection(index, "link", e.target.value)
-                        }
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                  </div>
+
+                  {/* Selected Products Display for Existing Collection */}
+                  {collection.products && collection.products.length > 0 && (
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">
+                          Selected Products:
+                        </span>
+                        <button
+                          onClick={() =>
+                            updateCollection(index, "products", [])
+                          }
+                          className="text-xs text-red-600 hover:text-red-800"
+                        >
+                          Clear All
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {collection.products.map((productId, productIndex) => (
+                          <div
+                            key={productIndex}
+                            className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 text-sm rounded-full"
+                          >
+                            <span className="mr-2">📦</span>
+                            <span className="font-mono text-xs">
+                              {typeof productId === "string"
+                                ? productId
+                                : productId?.id || productId?._id || "Unknown"}
+                            </span>
+                            <button
+                              onClick={() => {
+                                const newProducts = collection.products.filter(
+                                  (_, i) => i !== productIndex
+                                );
+                                updateCollection(
+                                  index,
+                                  "products",
+                                  newProducts
+                                );
+                              }}
+                              className="ml-2 text-green-600 hover:text-green-800"
+                            >
+                              <svg
+                                className="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                  )}
+
+                  <div className="mt-4">
+                    <button
+                      onClick={() => {
+                        setEditingCollectionIndex(index);
+                        setSelectedCollectionProducts([]);
+                        setShowCollectionSelector(true);
+                      }}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                      <span>Select Products</span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -970,6 +1190,20 @@ const HomepageManagement = () => {
         title="Select Featured Jewelry"
         multiple={true}
         productType="jewelry"
+      />
+
+      <ProductSelectorPopup
+        isOpen={showCollectionSelector}
+        onClose={() => setShowCollectionSelector(false)}
+        onSelect={handleCollectionProductSelect}
+        selectedProducts={selectedCollectionProducts}
+        title="Select Collection Products"
+        multiple={true}
+        productType={
+          editingCollectionIndex !== null
+            ? homepageData.collections[editingCollectionIndex]?.type || "gem"
+            : newCollection.type || "gem"
+        }
       />
     </AdminLayout>
   );

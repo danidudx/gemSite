@@ -59,6 +59,9 @@ const AdminDashboard = () => {
   };
 
   const formatPrice = (price) => {
+    if (typeof price !== "number" || isNaN(price)) {
+      return "N/A";
+    }
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
@@ -66,11 +69,18 @@ const AdminDashboard = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    if (!dateString) {
+      return "N/A";
+    }
+    try {
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return "N/A";
+    }
   };
 
   if (loading) {
@@ -284,10 +294,11 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {product.name}
+                          {product.name || "Unnamed Product"}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {product.category} • {formatPrice(product.price)}
+                          {product.category || "No Category"} •{" "}
+                          {formatPrice(product.price)}
                         </p>
                       </div>
                       <div className="text-sm text-gray-500">
@@ -337,10 +348,10 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {blog.title}
+                          {blog.title || "Untitled Blog Post"}
                         </p>
                         <p className="text-sm text-gray-500">
-                          by {blog.author}
+                          by {blog.author || "Unknown Author"}
                         </p>
                       </div>
                       <div className="text-sm text-gray-500">
