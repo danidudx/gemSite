@@ -141,6 +141,27 @@ const AdminDashboard = () => {
     }).format(price);
   };
 
+  const normalizeBlogData = (blog) => {
+    return {
+      ...blog,
+      id: blog.id || blog._id,
+      _id: blog._id || blog.id,
+      publishedAt:
+        blog.publishedAt || blog.createdAt || new Date().toISOString(),
+      featuredImage: blog.featuredImage
+        ? blog.featuredImage.startsWith("http")
+          ? blog.featuredImage
+          : `http://localhost:5000${blog.featuredImage}`
+        : "",
+      views: blog.views || 0,
+      tags: Array.isArray(blog.tags)
+        ? blog.tags
+        : blog.tags
+        ? blog.tags.split(",").map((tag) => tag.trim())
+        : [],
+    };
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) {
       return "N/A";
@@ -476,37 +497,52 @@ const AdminDashboard = () => {
             </div>
             <div className="divide-y divide-gray-200">
               {stats.recentBlogs.length > 0 ? (
-                stats.recentBlogs.slice(0, 5).map((blog, index) => (
-                  <div
-                    key={blog._id || blog.id || `blog-${index}`}
-                    className="px-6 py-4"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        {blog.featuredImage ? (
-                          <img
-                            src={blog.featuredImage}
-                            alt={blog.title}
-                            className="w-12 h-12 object-cover rounded-lg"
-                          />
-                        ) : (
-                          <span className="text-gray-400">📷</span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {blog.title || "Untitled Blog Post"}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          by {blog.author || "Unknown Author"}
-                        </p>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {formatDate(blog.publishedAt || blog.createdAt)}
+                stats.recentBlogs.slice(0, 5).map((blog, index) => {
+                  const normalizedBlog = normalizeBlogData(blog);
+                  return (
+                    <div
+                      key={normalizedBlog.id || `blog-${index}`}
+                      className="px-6 py-4"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                          {normalizedBlog.featuredImage ? (
+                            <img
+                              src={normalizedBlog.featuredImage}
+                              alt={normalizedBlog.title || "Blog post"}
+                              className="w-12 h-12 object-cover rounded-lg"
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.nextSibling.style.display = "block";
+                              }}
+                            />
+                          ) : null}
+                          <span
+                            className="text-gray-400"
+                            style={{
+                              display: normalizedBlog.featuredImage
+                                ? "none"
+                                : "block",
+                            }}
+                          >
+                            📷
+                          </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {normalizedBlog.title || "Untitled Blog Post"}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            by {normalizedBlog.author || "Unknown Author"}
+                          </p>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {formatDate(normalizedBlog.publishedAt)}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="px-6 py-8 text-center text-gray-500">
                   No blog posts yet

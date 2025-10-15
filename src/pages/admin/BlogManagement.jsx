@@ -18,9 +18,35 @@ const BlogManagement = () => {
 
   const blogsPerPage = 10;
 
+  const normalizeBlogData = (blog) => {
+    return {
+      ...blog,
+      id: blog.id || blog._id,
+      _id: blog._id || blog.id,
+      publishedAt:
+        blog.publishedAt || blog.createdAt || new Date().toISOString(),
+      featuredImage: blog.featuredImage
+        ? blog.featuredImage.startsWith("http")
+          ? blog.featuredImage
+          : `http://localhost:5000${blog.featuredImage}`
+        : "",
+      views: blog.views || 0,
+      tags: Array.isArray(blog.tags)
+        ? blog.tags
+        : blog.tags
+        ? blog.tags.split(",").map((tag) => tag.trim())
+        : [],
+    };
+  };
+
   useEffect(() => {
     fetchBlogs();
   }, [currentPage, searchTerm]);
+
+  // Refresh blogs when component mounts to ensure fresh data
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
 
   const fetchBlogs = async () => {
     try {
@@ -33,7 +59,10 @@ const BlogManagement = () => {
       };
 
       const response = await api.getBlogs(params);
-      setBlogs(response.blogs || []);
+      const normalizedBlogs = (response.blogs || []).map((blog) =>
+        normalizeBlogData(blog)
+      );
+      setBlogs(normalizedBlogs);
       setTotalPages(response.totalPages || 1);
     } catch (err) {
       const errorMessage = err.message || "Failed to fetch blog posts";
@@ -47,6 +76,13 @@ const BlogManagement = () => {
   const handleCreateBlog = () => {
     setEditingBlog(null);
     setShowForm(true);
+  };
+
+  const handleFormCancel = () => {
+    setShowForm(false);
+    setEditingBlog(null);
+    // Refresh the blog list when form is closed to ensure fresh data
+    fetchBlogs();
   };
 
   const handleEditBlog = (blog) => {
@@ -113,7 +149,9 @@ const BlogManagement = () => {
             setBlogs(
               blogs.map((b) => {
                 const currentId = b.id || b._id;
-                return currentId === blogId ? { ...b, ...altData1 } : b;
+                return currentId === blogId
+                  ? normalizeBlogData({ ...b, ...altData1 })
+                  : b;
               })
             );
             showNotification("Blog post updated successfully", "success");
@@ -138,7 +176,9 @@ const BlogManagement = () => {
             setBlogs(
               blogs.map((b) => {
                 const currentId = b.id || b._id;
-                return currentId === blogId ? { ...b, ...altData2 } : b;
+                return currentId === blogId
+                  ? normalizeBlogData({ ...b, ...altData2 })
+                  : b;
               })
             );
             showNotification("Blog post updated successfully", "success");
@@ -150,14 +190,22 @@ const BlogManagement = () => {
         setBlogs(
           blogs.map((b) => {
             const currentId = b.id || b._id;
-            return currentId === blogId ? { ...b, ...blogData } : b;
+            return currentId === blogId
+              ? normalizeBlogData({ ...b, ...blogData })
+              : b;
           })
         );
         showNotification("Blog post updated successfully", "success");
       } else {
         const newBlog = await api.createBlog(blogData);
-        setBlogs([newBlog, ...blogs]);
+        const normalizedBlog = normalizeBlogData(newBlog);
+        setBlogs([normalizedBlog, ...blogs]);
         showNotification("Blog post created successfully", "success");
+
+        // Refresh the blog list to ensure data consistency
+        setTimeout(() => {
+          fetchBlogs();
+        }, 500);
       }
       setShowForm(false);
       setEditingBlog(null);
@@ -169,11 +217,18 @@ const BlogManagement = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    if (!dateString) return "Not set";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Invalid date";
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch (error) {
+      return "Invalid date";
+    }
   };
 
   if (showForm) {
@@ -181,7 +236,7 @@ const BlogManagement = () => {
       <AdminLayout>
         <div className="mb-6">
           <button
-            onClick={() => setShowForm(false)}
+            onClick={handleFormCancel}
             className="flex items-center text-gray-600 hover:text-gray-900"
           >
             <svg
@@ -203,7 +258,7 @@ const BlogManagement = () => {
         <BlogForm
           blog={editingBlog}
           onSubmit={handleFormSubmit}
-          onCancel={() => setShowForm(false)}
+          onCancel={handleFormCancel}
         />
       </AdminLayout>
     );
@@ -214,12 +269,20 @@ const BlogManagement = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">Blog Management</h1>
-          <button
-            onClick={handleCreateBlog}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Create New Blog
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={fetchBlogs}
+              className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Refresh
+            </button>
+            <button
+              onClick={handleCreateBlog}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Create New Blog
+            </button>
+          </div>
         </div>
 
         {/* Search */}
@@ -287,12 +350,8 @@ const BlogManagement = () => {
                             <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
                               {blog.featuredImage ? (
                                 <img
-                                  src={
-                                    blog.featuredImage.startsWith("http")
-                                      ? blog.featuredImage
-                                      : `http://localhost:5000${blog.featuredImage}`
-                                  }
-                                  alt={blog.title}
+                                  src={blog.featuredImage}
+                                  alt={blog.title || "Blog post"}
                                   className="w-16 h-16 object-cover rounded-lg"
                                   onError={(e) => {
                                     e.target.style.display = "none";
@@ -315,17 +374,17 @@ const BlogManagement = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
-                              {blog.title}
+                              {blog.title || "Untitled"}
                             </div>
                             <div className="text-sm text-gray-500 max-w-xs truncate">
-                              {blog.excerpt}
+                              {blog.excerpt || "No excerpt available"}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {blog.author}
+                            {blog.author || "Unknown author"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {formatDate(blog.publishedAt || blog.createdAt)}
+                            {formatDate(blog.publishedAt)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {blog.views || 0}
