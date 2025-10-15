@@ -40,11 +40,11 @@ export function NotificationProvider({ children }) {
 
 const NotificationContainer = ({ notifications, onRemove }) => {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2">
+    <div className="fixed top-4 right-4 z-50 space-y-2 max-w-md">
       {notifications.map((notification) => (
         <div
           key={notification.id}
-          className={`max-w-lg w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden ${
+          className={`w-full min-w-80 max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden transform transition-all duration-300 ease-in-out ${
             notification.type === "success"
               ? "border-l-4 border-green-400"
               : notification.type === "error"
@@ -110,16 +110,16 @@ const NotificationContainer = ({ notifications, onRemove }) => {
                   </svg>
                 )}
               </div>
-              <div className="ml-3 w-0 flex-1 pt-0.5">
+              <div className="ml-3 flex-1 pt-0.5 min-w-0">
                 <p
-                  className={`text-sm font-medium ${
+                  className={`text-sm font-medium break-words ${
                     notification.type === "success"
-                      ? "text-green-800"
+                      ? "text-green-800 dark:text-green-200"
                       : notification.type === "error"
-                      ? "text-red-800"
+                      ? "text-red-800 dark:text-red-200"
                       : notification.type === "warning"
-                      ? "text-yellow-800"
-                      : "text-blue-800"
+                      ? "text-yellow-800 dark:text-yellow-200"
+                      : "text-blue-800 dark:text-blue-200"
                   }`}
                 >
                   {notification.message}
@@ -127,7 +127,7 @@ const NotificationContainer = ({ notifications, onRemove }) => {
               </div>
               <div className="ml-4 flex-shrink-0 flex">
                 <button
-                  className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  className="bg-white dark:bg-gray-800 rounded-md inline-flex text-gray-400 dark:text-gray-500 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   onClick={() => onRemove(notification.id)}
                 >
                   <span className="sr-only">Close</span>

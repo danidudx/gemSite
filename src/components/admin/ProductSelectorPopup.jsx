@@ -208,7 +208,7 @@ const ProductSelectorPopup = ({
                       }`}
                     >
                       <div className="flex items-start space-x-3">
-                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 relative">
                           {(() => {
                             const hasValidImage =
                               product.images &&
@@ -221,11 +221,10 @@ const ProductSelectorPopup = ({
                             return hasValidImage ? (
                               <img
                                 src={product.images[0]}
-                                alt={product.name}
-                                className="w-16 h-16 object-cover rounded-lg"
+                                alt=""
+                                className="w-16 h-16 object-cover rounded-lg absolute inset-0"
                                 onError={(e) => {
                                   e.target.style.display = "none";
-                                  e.target.nextSibling.style.display = "inline";
                                 }}
                               />
                             ) : null;

@@ -274,20 +274,30 @@ const ProductManagement = () => {
                     {products.map((product) => (
                       <tr key={product.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                            {product.images &&
-                            product.images.length > 0 &&
-                            product.images[0] ? (
-                              <img
-                                src={product.images[0]}
-                                alt={product.name}
-                                className="w-12 h-12 object-cover rounded-lg"
-                              />
-                            ) : (
-                              <span className="text-2xl">
-                                {product.type === "gem" ? "💎" : "💍"}
-                              </span>
-                            )}
+                          <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center relative">
+                            {(() => {
+                              const hasValidImage =
+                                product.images &&
+                                product.images.length > 0 &&
+                                product.images[0] &&
+                                product.images[0].trim() !== "" &&
+                                !product.images[0].includes("undefined") &&
+                                !product.images[0].includes("null");
+
+                              return hasValidImage ? (
+                                <img
+                                  src={product.images[0]}
+                                  alt=""
+                                  className="w-12 h-12 object-cover rounded-lg absolute inset-0"
+                                  onError={(e) => {
+                                    e.target.style.display = "none";
+                                  }}
+                                />
+                              ) : null;
+                            })()}
+                            <span className="text-2xl">
+                              {product.type === "gem" ? "💎" : "💍"}
+                            </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
