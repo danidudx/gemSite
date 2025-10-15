@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import AdminLayout from "../../components/admin/AdminLayout";
+import ProductSelectorPopup from "../../components/admin/ProductSelectorPopup";
 import { useNotification } from "../../hooks/useNotification";
 import api from "../../services/api";
 
@@ -18,6 +19,12 @@ const HomepageManagement = () => {
   // Separate state for editing featured items
   const [editingFeaturedGems, setEditingFeaturedGems] = useState("");
   const [editingFeaturedJewelry, setEditingFeaturedJewelry] = useState("");
+
+  // Product selector popup states
+  const [showGemsSelector, setShowGemsSelector] = useState(false);
+  const [showJewelrySelector, setShowJewelrySelector] = useState(false);
+  const [selectedGems, setSelectedGems] = useState([]);
+  const [selectedJewelry, setSelectedJewelry] = useState([]);
 
   // Form states for each section
   const [newCollection, setNewCollection] = useState({
@@ -54,6 +61,10 @@ const HomepageManagement = () => {
         data.featuredJewelry?.map((item) => item.id || item._id).join(", ") ||
           ""
       );
+
+      // Set selected products for popup display
+      setSelectedGems(data.featuredGems || []);
+      setSelectedJewelry(data.featuredJewelry || []);
     } catch (err) {
       console.error("Failed to fetch homepage data:", err);
       setError(err.message);
@@ -165,6 +176,25 @@ const HomepageManagement = () => {
     }));
   };
 
+  // Product selector handlers
+  const handleGemsSelect = (products) => {
+    setSelectedGems(products);
+    setEditingFeaturedGems(products.map((p) => p.id || p._id).join(", "));
+    setHomepageData((prev) => ({
+      ...prev,
+      featuredGems: products,
+    }));
+  };
+
+  const handleJewelrySelect = (products) => {
+    setSelectedJewelry(products);
+    setEditingFeaturedJewelry(products.map((p) => p.id || p._id).join(", "));
+    setHomepageData((prev) => ({
+      ...prev,
+      featuredJewelry: products,
+    }));
+  };
+
   if (loading) {
     return (
       <AdminLayout>
@@ -222,27 +252,117 @@ const HomepageManagement = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-medium text-gray-900">Featured Gems</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Select gems to feature on the homepage (Product IDs)
+              Select gems to feature on the homepage
             </p>
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <input
-                  type="text"
-                  placeholder="Enter product IDs (comma-separated)"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={editingFeaturedGems}
-                  onChange={(e) => setEditingFeaturedGems(e.target.value)}
-                />
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => setShowGemsSelector(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <span>Browse Products</span>
+                </button>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 mb-2">
                 Current featured gems:{" "}
                 {
                   editingFeaturedGems.split(",").filter((id) => id.trim())
                     .length
                 }
               </div>
+
+              {/* Selected Gems Display */}
+              {editingFeaturedGems.split(",").filter((id) => id.trim()).length >
+                0 && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      Selected Gems:
+                    </span>
+                    <button
+                      onClick={() => {
+                        setEditingFeaturedGems("");
+                        setSelectedGems([]);
+                        setHomepageData((prev) => ({
+                          ...prev,
+                          featuredGems: [],
+                        }));
+                      }}
+                      className="text-xs text-red-600 hover:text-red-800"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {editingFeaturedGems
+                      .split(",")
+                      .filter((id) => id.trim())
+                      .map((gemId, index) => (
+                        <div
+                          key={index}
+                          className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                        >
+                          <span className="mr-2">💎</span>
+                          <span className="font-mono text-xs">
+                            {gemId.trim()}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const currentIds = editingFeaturedGems
+                                .split(",")
+                                .filter((id) => id.trim());
+                              const newIds = currentIds.filter(
+                                (_, i) => i !== index
+                              );
+                              const newIdsString = newIds.join(", ");
+                              setEditingFeaturedGems(newIdsString);
+
+                              // Update homepageData with the new selection
+                              const updatedGems = selectedGems.filter(
+                                (_, i) => i !== index
+                              );
+                              setSelectedGems(updatedGems);
+                              setHomepageData((prev) => ({
+                                ...prev,
+                                featuredGems: updatedGems,
+                              }));
+                            }}
+                            className="ml-2 text-blue-600 hover:text-blue-800"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
 
               {/* Display current featured gems */}
               {homepageData.featuredGems &&
@@ -259,14 +379,16 @@ const HomepageManagement = () => {
                         >
                           <div className="flex items-center space-x-3">
                             <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                              {gem.image ? (
+                              {gem.images &&
+                              gem.images.length > 0 &&
+                              gem.images[0] ? (
                                 <img
-                                  src={gem.image}
+                                  src={gem.images[0]}
                                   alt={gem.name}
                                   className="w-12 h-12 object-cover rounded-lg"
                                 />
                               ) : (
-                                <span className="text-gray-400">💎</span>
+                                <span className="text-2xl">💎</span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -294,27 +416,117 @@ const HomepageManagement = () => {
               Featured Jewelry
             </h3>
             <p className="mt-1 text-sm text-gray-500">
-              Select jewelry items to feature on the homepage (Product IDs)
+              Select jewelry items to feature on the homepage
             </p>
           </div>
           <div className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <input
-                  type="text"
-                  placeholder="Enter product IDs (comma-separated)"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={editingFeaturedJewelry}
-                  onChange={(e) => setEditingFeaturedJewelry(e.target.value)}
-                />
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => setShowJewelrySelector(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                  <span>Browse Products</span>
+                </button>
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-gray-500 mb-2">
                 Current featured jewelry:{" "}
                 {
                   editingFeaturedJewelry.split(",").filter((id) => id.trim())
                     .length
                 }
               </div>
+
+              {/* Selected Jewelry Display */}
+              {editingFeaturedJewelry.split(",").filter((id) => id.trim())
+                .length > 0 && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      Selected Jewelry:
+                    </span>
+                    <button
+                      onClick={() => {
+                        setEditingFeaturedJewelry("");
+                        setSelectedJewelry([]);
+                        setHomepageData((prev) => ({
+                          ...prev,
+                          featuredJewelry: [],
+                        }));
+                      }}
+                      className="text-xs text-red-600 hover:text-red-800"
+                    >
+                      Clear All
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {editingFeaturedJewelry
+                      .split(",")
+                      .filter((id) => id.trim())
+                      .map((jewelryId, index) => (
+                        <div
+                          key={index}
+                          className="inline-flex items-center px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full"
+                        >
+                          <span className="mr-2">💍</span>
+                          <span className="font-mono text-xs">
+                            {jewelryId.trim()}
+                          </span>
+                          <button
+                            onClick={() => {
+                              const currentIds = editingFeaturedJewelry
+                                .split(",")
+                                .filter((id) => id.trim());
+                              const newIds = currentIds.filter(
+                                (_, i) => i !== index
+                              );
+                              const newIdsString = newIds.join(", ");
+                              setEditingFeaturedJewelry(newIdsString);
+
+                              // Update homepageData with the new selection
+                              const updatedJewelry = selectedJewelry.filter(
+                                (_, i) => i !== index
+                              );
+                              setSelectedJewelry(updatedJewelry);
+                              setHomepageData((prev) => ({
+                                ...prev,
+                                featuredJewelry: updatedJewelry,
+                              }));
+                            }}
+                            className="ml-2 text-purple-600 hover:text-purple-800"
+                          >
+                            <svg
+                              className="w-3 h-3"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
 
               {/* Display current featured jewelry */}
               {homepageData.featuredJewelry &&
@@ -331,14 +543,16 @@ const HomepageManagement = () => {
                         >
                           <div className="flex items-center space-x-3">
                             <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                              {jewelry.image ? (
+                              {jewelry.images &&
+                              jewelry.images.length > 0 &&
+                              jewelry.images[0] ? (
                                 <img
-                                  src={jewelry.image}
+                                  src={jewelry.images[0]}
                                   alt={jewelry.name}
                                   className="w-12 h-12 object-cover rounded-lg"
                                 />
                               ) : (
-                                <span className="text-gray-400">💍</span>
+                                <span className="text-2xl">💍</span>
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -736,6 +950,27 @@ const HomepageManagement = () => {
           </div>
         </div>
       </div>
+
+      {/* Product Selector Popups */}
+      <ProductSelectorPopup
+        isOpen={showGemsSelector}
+        onClose={() => setShowGemsSelector(false)}
+        onSelect={handleGemsSelect}
+        selectedProducts={selectedGems}
+        title="Select Featured Gems"
+        multiple={true}
+        productType="gem"
+      />
+
+      <ProductSelectorPopup
+        isOpen={showJewelrySelector}
+        onClose={() => setShowJewelrySelector(false)}
+        onSelect={handleJewelrySelect}
+        selectedProducts={selectedJewelry}
+        title="Select Featured Jewelry"
+        multiple={true}
+        productType="jewelry"
+      />
     </AdminLayout>
   );
 };

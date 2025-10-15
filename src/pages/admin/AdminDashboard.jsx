@@ -258,14 +258,18 @@ const AdminDashboard = () => {
                   <div key={product.id} className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        {product.images && product.images.length > 0 ? (
+                        {product.images &&
+                        product.images.length > 0 &&
+                        product.images[0] ? (
                           <img
                             src={product.images[0]}
                             alt={product.name}
                             className="w-12 h-12 object-cover rounded-lg"
                           />
                         ) : (
-                          <span className="text-gray-400">📷</span>
+                          <span className="text-2xl">
+                            {product.type === "gem" ? "💎" : "💍"}
+                          </span>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
