@@ -4,35 +4,45 @@
 
 :root {
   /* Colors */
-  --color-primary: #3b82f6;
-  --color-secondary: #8b5cf6;
-  --color-accent: #f59e0b;
-  --color-black: #000000;
+  --color-primary: #2563eb;
+  --color-secondary: #7c3aed;
+  --color-accent: #059669;
+  --color-black: #111827;
   --color-white: #ffffff;
 
   /* Text Colors */
-  --text-primary: #1f2937;
-  --text-secondary: #4b5563;
-  --text-tertiary: #6b7280;
-  --text-light: #9ca3af;
+  --text-primary: #374151;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --text-light: #d1d5db;
 
   /* Background Colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --bg-glass: rgba(255, 255, 255, 0.8);
-  --bg-glass-dark: rgba(0, 0, 0, 0.8);
+  --bg-primary: #fefefe;
+  --bg-secondary: #f8fafc;
+  --bg-glass: rgba(255, 255, 255, 0.9);
+  --bg-glass-dark: rgba(17, 24, 39, 0.7);
 
   /* Border Colors */
-  --border-primary: #e5e7eb;
-  --border-secondary: #d1d5db;
+  --border-primary: #e2e8f0;
+  --border-secondary: #cbd5e1;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+
+  /* Diamond Shapes Colors */
+  --diamond-section-bg: #1a3d52;
+  --diamond-title-color: #1a3d52;
+  --diamond-desc-color: #2c3e50;
+  --diamond-cta-color: #1a3d52;
+  --diamond-overlay-bg: rgba(255, 255, 255, 0.75);
+  --diamond-border-color: #1a3d52;
 
   /* Fonts */
   --font-primary: "Inter", sans-serif;
   --font-secondary: "Playfair Display", serif;
+  --font-serif: "Georgia", "Playfair Display", serif;
+  --font-sans: "Arial", "Helvetica", sans-serif;
   --font-thin: 300;
   --font-normal: 400;
   --font-semibold: 600;
@@ -76,5 +86,29 @@
     .content-with-header {
       padding-top: 100px; /* Smaller padding for mobile */
     }
+  }
+
+  /* Diamond Shapes Styles */
+  .diamond-overlay {
+    background: var(--diamond-overlay-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  .diamond-title {
+    font-family: var(--font-serif);
+    color: var(--diamond-title-color);
+  }
+
+  .diamond-description {
+    font-family: var(--font-sans);
+    color: var(--diamond-desc-color);
+    line-height: 1.5;
+  }
+
+  .diamond-cta {
+    font-family: var(--font-sans);
+    color: var(--diamond-cta-color);
+    border-color: var(--diamond-border-color);
   }
 }

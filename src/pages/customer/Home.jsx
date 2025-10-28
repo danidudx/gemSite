@@ -6,9 +6,9 @@ import CreativeStudio from "../../components/customer/CreativeStudio";
 import DiamondShapes from "../../components/customer/DiamondShapes";
 import PersonalizedCollection from "../../components/customer/PersonalizedCollection";
 import PearlsSection from "../../components/customer/PearlsSection";
-import ShowroomSection from "../../components/customer/ShowroomSection";
+
 import WhyJwellco from "../../components/customer/WhyJwellco";
-import ReviewsSection from "../../components/customer/ReviewsSection";
+
 
 export default function Home() {
   return (
@@ -20,9 +20,9 @@ export default function Home() {
       <DiamondShapes />
       <PersonalizedCollection />
       <PearlsSection />
-      <ShowroomSection />
+     
       <WhyJwellco />
-      <ReviewsSection />
+      
       <Footer />
     </div>
   );
