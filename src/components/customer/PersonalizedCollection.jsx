@@ -70,21 +70,23 @@ export default function Testimonials() {
   const currentTestimonial = testimonials[currentIndex];
 
   return (
-    <section className="bg-gradient-to-b from-white to-gray-50 py-20 px-4">
-      <div className="container mx-auto max-w-4xl">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-light tracking-wide text-gray-900 mb-4">
+    <section className="bg-white py-20 md:py-28">
+      <div className="container mx-auto px-4 md:px-8">
+        {/* Header Section */}
+        <div className="text-center mb-16 md:mb-20">
+          <div className="inline-block mb-4">
+            <span className="text-sm md:text-base uppercase tracking-[0.2em] text-gray-500 font-medium">
+              Customer Stories
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-gray-900 mb-6 tracking-tight">
             What Our Customers Say
           </h2>
-          <div className="w-24 h-px bg-gray-300 mx-auto mt-6"></div>
-          <p className="text-gray-600 mt-8 max-w-2xl mx-auto text-lg">
-            Discover why thousands of customers trust us for their most precious moments
-          </p>
+          <div className="w-20 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-auto"></div>
         </div>
 
         {/* Carousel Container */}
-        <div className="relative">
+        <div className="relative max-w-4xl mx-auto">
           <div 
             key={currentIndex}
             className="animate-fade-in"
@@ -109,7 +111,7 @@ export default function Testimonials() {
             </div>
 
             {/* Testimonial Text */}
-            <p className="text-gray-800 text-lg md:text-2xl leading-relaxed text-center mb-8 italic max-w-3xl mx-auto font-light">
+            <p className="text-gray-600 leading-relaxed text-sm md:text-base text-center mb-8 italic max-w-3xl mx-auto">
               {currentTestimonial.text}
             </p>
 
@@ -121,8 +123,8 @@ export default function Testimonials() {
                 className="w-20 h-20 rounded-full object-cover shadow-lg ring-2 ring-white"
               />
               <div className="text-center">
-                <p className="font-semibold text-gray-900 text-lg">{currentTestimonial.name}</p>
-                <p className="text-sm text-gray-500 mt-1">{currentTestimonial.role}</p>
+                <p className="text-xl md:text-2xl font-serif text-gray-900">{currentTestimonial.name}</p>
+                <p className="text-sm text-gray-500 uppercase tracking-wider font-medium mt-1">{currentTestimonial.role}</p>
               </div>
             </div>
           </div>
@@ -165,13 +167,18 @@ export default function Testimonials() {
           </div>
 
         {/* Bottom CTA */}
-        <div className="text-center mt-12">
-          <p className="text-gray-600 mb-6">
+        <div className="text-center mt-16">
+          <p className="text-gray-600 mb-6 text-sm md:text-base">
             Join thousands of satisfied customers
           </p>
           <button className="border-2 border-gray-900 px-10 py-3 hover:bg-gray-900 hover:text-white transition-colors duration-300 font-light tracking-wide">
             SHOP COLLECTION
           </button>
+        </div>
+
+        {/* Bottom Decorative Line */}
+        <div className="mt-16 text-center">
+          <div className="w-24 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mx-auto"></div>
         </div>
       </div>
 

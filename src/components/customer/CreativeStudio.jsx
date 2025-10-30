@@ -40,8 +40,10 @@ export default function CreativeStudio() {
         <div className="max-w-lg relative z-10">
           {/* Elegant Badge */}
           <div className="inline-flex items-center px-4 py-2 bg-gray-100 rounded-full mb-8">
-            <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-            <span className="text-xs font-medium text-gray-600 uppercase tracking-widest">Luxury Collection</span>
+            
+            <span className="text-sm md:text-base uppercase tracking-[0.2em] text-gray-500 font-medium">
+            Luxury Collection
+            </span>
             </div>
             
           {/* Main Headline */}
