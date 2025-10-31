@@ -1,4 +1,4 @@
-import { ChevronUp } from 'lucide-react';
+import { ChevronUp, Gem } from 'lucide-react';
 
 export default function CreativeStudio() {
   const scrollToTop = () => {
@@ -61,19 +61,19 @@ export default function CreativeStudio() {
           <div className="mb-12">
             <div className="space-y-6">
               <div className="flex items-center space-x-4 group">
-                <div className="w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-500 rounded-full"></div>
+                <Gem className="w-5 h-5 text-blue-800 flex-shrink-0 group-hover:text-blue-900 transition-colors" />
                 <span className="text-gray-700 font-medium tracking-wide group-hover:text-gray-900 transition-colors">Custom Design</span>
               </div>
               <div className="flex items-center space-x-4 group">
-                <div className="w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-500 rounded-full"></div>
+                <Gem className="w-5 h-5 text-blue-800 flex-shrink-0 group-hover:text-blue-900 transition-colors" />
                 <span className="text-gray-700 font-medium tracking-wide group-hover:text-gray-900 transition-colors">Premium Materials</span>
               </div>
               <div className="flex items-center space-x-4 group">
-                <div className="w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-500 rounded-full"></div>
+                <Gem className="w-5 h-5 text-blue-800 flex-shrink-0 group-hover:text-blue-900 transition-colors" />
                 <span className="text-gray-700 font-medium tracking-wide group-hover:text-gray-900 transition-colors">Expert Craftsmanship</span>
               </div>
               <div className="flex items-center space-x-4 group">
-                <div className="w-1 h-8 bg-gradient-to-b from-blue-400 to-blue-500 rounded-full"></div>
+                <Gem className="w-5 h-5 text-blue-800 flex-shrink-0 group-hover:text-blue-900 transition-colors" />
                 <span className="text-gray-700 font-medium tracking-wide group-hover:text-gray-900 transition-colors">Lifetime Warranty</span>
               </div>
             </div>
@@ -81,9 +81,9 @@ export default function CreativeStudio() {
           
           {/* Elegant Call to Action */}
           <div className="flex items-center space-x-6">
-            <button className="group relative bg-gray-900 text-white px-10 py-5 text-sm font-medium tracking-widest uppercase hover:bg-gray-800 transition-all duration-500 overflow-hidden">
+            <button className="group relative bg-gray-900 text-white px-10 py-5 text-sm font-medium tracking-widest uppercase hover:bg-blue-800 transition-all duration-500 overflow-hidden">
               <span className="relative z-10">Explore Collection</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-400 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-800 to-blue-900 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
             </button>
             
             <div className="flex items-center space-x-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
