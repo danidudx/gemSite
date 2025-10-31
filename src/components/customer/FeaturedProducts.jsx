@@ -198,8 +198,9 @@ export default function FeaturedProducts() {
 
         {/* Load More Button */}
         <div className="text-center mt-16">
-          <button className="px-8 py-3 border border-gray-300 text-gray-700 font-medium uppercase tracking-wide hover:bg-gray-50 transition-colors duration-300">
-            Load More
+          
+          <button className="border-2 border-gray-900 px-10 py-3 hover:bg-gray-900 hover:text-white transition-colors duration-300 font-light tracking-wide">
+            SHOP COLLECTION
           </button>
         </div>
 
