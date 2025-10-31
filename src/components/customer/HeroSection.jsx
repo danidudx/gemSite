@@ -46,8 +46,8 @@ export default function HeroSection() {
 
   return (
     <section className="relative h-screen overflow-hidden">
-      <div className="absolute inset-0 bg-black/50 z-10"></div>
-      <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/20 z-10"></div>
+      <div className="absolute inset-0 bg-black/35 z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 z-10"></div>
       
       <div className="relative w-full h-full">
         {slides.map((slide, index) => (
@@ -57,11 +57,11 @@ export default function HeroSection() {
             muted
             loop
             playsInline
-            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 filter brightness-90 contrast-110 ${
+            className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
               index === currentSlideIndex ? 'opacity-100' : 'opacity-0'
             }`}
             style={{
-              filter: 'brightness(0.8) contrast(1.1) saturate(1.2)'
+              filter: 'brightness(0.75) contrast(1.15) saturate(1.1)'
             }}
           >
             <source src={slide.videoSrc} type="video/mp4" />
@@ -70,89 +70,109 @@ export default function HeroSection() {
         ))}
       </div>
       
-      <div className="absolute inset-0 z-20 flex items-center">
+      <div className="absolute inset-0 z-20 flex items-center justify-center">
         <div className="container mx-auto px-4 lg:px-8">
-          <div className="max-w-2xl">
+          <div className="max-w-5xl mx-auto text-center">
+            {/* Decorative line above subtitle */}
+            <div className="flex items-center justify-center mb-8 animate-fade-in" style={{ opacity: 0 }}>
+              <div className="w-20 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
+            </div>
+
             {/* Subtitle */}
-            <div className="text-white text-sm uppercase tracking-wider mb-5 -mt-2 pb-5">
-              <span className="opacity-80">LUXURY JEWELRY</span>
-          </div>
+            <div 
+              key={`subtitle-${currentSlideIndex}`}
+              className="text-white/85 text-[10px] md:text-xs uppercase tracking-[0.3em] mb-10 font-extralight animate-fade-in-up"
+            >
+              <span className="inline-block">LUXURY JEWELRY</span>
+            </div>
           
             {/* Main Title */}
             <h1 
-              className="text-white font-serif font-light leading-tight mb-6 -mt-3"
+              key={`title-${currentSlideIndex}`}
+              className="text-white font-serif font-extralight leading-[1.08] mb-12 animate-fade-in-up-delay"
               style={{
-                fontSize: 'clamp(40px, 8vw, 85px)',
-                lineHeight: '1.05',
-                letterSpacing: '-0.06em'
+                fontSize: 'clamp(48px, 7.5vw, 100px)',
+                letterSpacing: '-0.03em',
+                textShadow: '0 4px 30px rgba(0,0,0,0.6), 0 2px 10px rgba(0,0,0,0.4)',
+                fontWeight: 300
               }}
             >
               {slides[currentSlideIndex].title}
-          </h1>
+            </h1>
           
+            {/* Decorative line */}
+            <div className="flex items-center justify-center mb-10 animate-fade-in-delay" style={{ opacity: 0 }}>
+              <div className="w-24 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"></div>
+            </div>
+
             {/* Description */}
             <div 
-              className="text-white mb-8 -mt-3 pt-5 pb-5"
+              key={`desc-${currentSlideIndex}`}
+              className="text-white/90 mb-12 mx-auto animate-fade-in-up-delay-2"
               style={{
-                maxWidth: '510px',
-                lineHeight: '1.6'
+                maxWidth: '640px',
+                lineHeight: '1.85'
               }}
             >
-              <p className="text-base md:text-lg">
+              <p className="text-[15px] md:text-lg font-extralight leading-relaxed tracking-wide">
                 {slides[currentSlideIndex].description}
               </p>
             </div>
             
             {/* Button */}
-            <div className="pt-5">
-              <button className="bg-white text-gray-800 px-8 py-4 text-sm font-medium tracking-wider uppercase hover:bg-gray-100 transition-colors duration-300">
-                {slides[currentSlideIndex].buttonText}
-            </button>
-          </div>
+            <div key={`button-${currentSlideIndex}`} className="mb-8 animate-fade-in-up-delay-3">
+              <button className="group relative bg-white/95 text-gray-900 px-12 py-4 text-xs font-light tracking-[0.2em] uppercase hover:bg-white transition-all duration-500 shadow-xl hover:shadow-2xl transform hover:scale-[1.02] overflow-hidden">
+                <span className="relative z-10">{slides[currentSlideIndex].buttonText}</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+              </button>
+            </div>
           
             {/* Features */}
-            <div className="pt-6 flex flex-wrap gap-x-8 gap-y-2 justify-start">
-              <div className="text-white text-sm flex items-center gap-2">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Free Shipping</span>
-            </div>
-              <div className="text-white text-sm flex items-center gap-2">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Lifetime Warranty</span>
-            </div>
-              <div className="text-white text-sm flex items-center gap-2">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Expert Craftsmanship</span>
-            </div>
-          </div>
+            {/* <div className="pt-4 flex flex-wrap gap-x-10 gap-y-4 justify-center items-center">
+              <div className="text-white/90 text-sm flex items-center gap-2.5 font-light">
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <span>Free Shipping</span>
+              </div>
+              <div className="text-white/90 text-sm flex items-center gap-2.5 font-light">
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <span>Lifetime Warranty</span>
+              </div>
+              <div className="text-white/90 text-sm flex items-center gap-2.5 font-light">
+                <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                <span>Expert Craftsmanship</span>
+              </div>
+            </div> */}
           </div>
         </div>
       </div>
       
       <button 
         onClick={prevSlide}
-        className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 text-white hover:text-gray-300 transition-colors duration-300"
+        className="absolute left-6 md:left-8 top-1/2 transform -translate-y-1/2 z-30 text-white/90 hover:text-white transition-all duration-300 hover:scale-110 backdrop-blur-sm bg-white/5 rounded-full p-2"
+        aria-label="Previous slide"
       >
-        <ChevronLeft size={32} />
+        <ChevronLeft size={28} strokeWidth={1.5} />
       </button>
       
       <button 
         onClick={nextSlide}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 text-white hover:text-gray-300 transition-colors duration-300"
+        className="absolute right-6 md:right-8 top-1/2 transform -translate-y-1/2 z-30 text-white/90 hover:text-white transition-all duration-300 hover:scale-110 backdrop-blur-sm bg-white/5 rounded-full p-2"
+        aria-label="Next slide"
       >
-        <ChevronRight size={32} />
+        <ChevronRight size={28} strokeWidth={1.5} />
       </button>
       
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 flex items-center space-x-2">
+      <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-30 flex items-center gap-2.5">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentSlideIndex(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            className={`rounded-full transition-all duration-300 ${
               index === currentSlideIndex 
-                ? 'bg-white scale-125' 
-                : 'bg-white/50 hover:bg-white/75'
+                ? 'w-2.5 h-2.5 bg-white shadow-lg' 
+                : 'w-2 h-2 bg-white/40 hover:bg-white/60'
             }`}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
