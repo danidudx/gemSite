@@ -71,6 +71,18 @@ export default function Header() {
             >
               BLOG <ChevronDown size={14} className="opacity-70" />
             </Link>
+            <Link
+              to="/about-us"
+              className="flex items-center gap-1 transition-all duration-300 hover:scale-105 font-medium tracking-wide text-white hover:text-gray-200"
+            >
+              ABOUT US
+            </Link>
+            <Link
+              to="/contact-us"
+              className="flex items-center gap-1 transition-all duration-300 hover:scale-105 font-medium tracking-wide text-white hover:text-gray-200"
+            >
+              CONTACT US
+            </Link>
           </nav>
 
           <div className="flex items-center gap-6">
@@ -181,6 +193,20 @@ export default function Header() {
               onClick={() => setIsMenuOpen(false)}
             >
               BLOG
+            </Link>
+            <Link
+              to="/about-us"
+              className="block py-2 transition-colors font-medium tracking-wide text-white hover:text-gray-200"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              ABOUT US
+            </Link>
+            <Link
+              to="/contact-us"
+              className="block py-2 transition-colors font-medium tracking-wide text-white hover:text-gray-200"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              CONTACT US
             </Link>
             {!user && (
               <div className="pt-4 border-t border-gray-200 space-y-2">

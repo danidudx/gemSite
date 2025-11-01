@@ -16,6 +16,8 @@ import Dashboard from "./pages/customer/Dashboard";
 import Profile from "./pages/customer/Profile";
 import SavedItems from "./pages/customer/SavedItems";
 import Blogs from "./pages/customer/Blogs";
+import AboutUs from "./pages/customer/AboutUs";
+import ContactUs from "./pages/customer/ContactUs";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProductManagement from "./pages/admin/ProductManagement";
 import BlogManagement from "./pages/admin/BlogManagement";
@@ -98,6 +100,22 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <Blogs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/about-us"
+                element={
+                  <ProtectedRoute>
+                    <AboutUs />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/contact-us"
+                element={
+                  <ProtectedRoute>
+                    <ContactUs />
                   </ProtectedRoute>
                 }
               />

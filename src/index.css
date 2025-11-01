@@ -160,4 +160,171 @@
   .animate-fade-in-delay {
     animation: fade-in 1.5s ease-out 0.3s forwards;
   }
+
+  /* Elegant About Us Hero Animations */
+  @keyframes float-1 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.3;
+    }
+    33% {
+      transform: translate(30px, -30px) scale(1.1);
+      opacity: 0.4;
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes float-2 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+      opacity: 0.25;
+    }
+    33% {
+      transform: translate(-40px, 40px) scale(1.15);
+      opacity: 0.35;
+    }
+    66% {
+      transform: translate(30px, -30px) scale(0.85);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes float-3 {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 0.2;
+    }
+    50% {
+      transform: translate(-50%, -50%) scale(1.2);
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% {
+      opacity: 0.3;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+  }
+
+  @keyframes pulse-slow-delay {
+    0%, 100% {
+      opacity: 0.3;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+      opacity: 0.6;
+      transform: translate(-50%, -50%) scale(1.2);
+    }
+  }
+
+  @keyframes underline-expand {
+    0% {
+      width: 0;
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      width: 100%;
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes line-fade {
+    0%, 100% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes spin-slow-reverse {
+    from {
+      transform: rotate(360deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+
+  .animate-float-1 {
+    animation: float-1 20s ease-in-out infinite;
+  }
+
+  .animate-float-2 {
+    animation: float-2 25s ease-in-out infinite;
+  }
+
+  .animate-float-3 {
+    animation: float-3 30s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow-delay {
+    animation: pulse-slow-delay 3s ease-in-out 1.5s infinite;
+  }
+
+  .animate-underline-expand {
+    animation: underline-expand 2s ease-out 0.8s forwards;
+  }
+
+  .animate-line-fade {
+    animation: line-fade 4s ease-in-out infinite;
+  }
+
+  .animate-line-fade-delay {
+    animation: line-fade 4s ease-in-out 2s infinite;
+  }
+
+  .animate-spin-slow {
+    animation: spin-slow 30s linear infinite;
+  }
+
+  .animate-spin-slow-reverse {
+    animation: spin-slow-reverse 40s linear infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
